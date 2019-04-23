@@ -32,6 +32,7 @@ SELECT TOP 100
     else cast(der.transaction_isolation_level as varchar) end) as transaction_isolation_level
     ,der.granted_query_memory * 8 as granted_query_memory_kb --キロバイト単位
     ,deqp.query_plan -- 実行プラン
+    ,plan_handle --リコンパイルさせたい場合はDBCC FREEPROCCACHE(plan_handle)を実行
 FROM
     sys.dm_exec_requests der
 JOIN sys.dm_exec_sessions des ON des.session_id = der.session_id
