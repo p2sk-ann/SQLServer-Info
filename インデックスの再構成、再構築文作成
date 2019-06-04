@@ -1,0 +1,25 @@
+/*
+時間計測時は以下のSQLを実行する
+
+set nocount on; create table #RESULT (txt varchar(4000), duration varchar(100)); DECLARE @StartTime datetime; SET @StartTime = GETDATE()
+
+--ここに[再構築文_時間計測付き]または[再構成文_時間計測付き]の全クエリを張り付け
+
+select * from #RESULT
+*/
+
+SELECT DB_NAME() AS Database_Name
+, sc.name AS Schema_Name
+, o.name AS Table_Name
+, i.name AS Index_Name
+, i.type_desc AS Index_Type
+, 'ALTER INDEX [' + i.name + '] on [' + sc.name + '].[' + o.name + '] REBUILD;' as '再構築文'
+, 'ALTER INDEX [' + i.name + '] on [' + sc.name + '].[' + o.name + '] REORGANIZE;' as '再構成文'
+, 'ALTER INDEX [' + i.name + '] on [' + sc.name + '].[' + o.name + '] REBUILD; INSERT INTO #RESULT (txt, duration) SELECT ''ALTER INDEX [' + i.name + '] on [' + sc.name + '].[' + o.name + '] REBUILD;'', CONVERT(varchar,GETDATE()-@StartTime,114); SET @StartTime = GETDATE();' as '再構築文_時間計測付き'
+, 'ALTER INDEX [' + i.name + '] on [' + sc.name + '].[' + o.name + '] REORGANIZE; INSERT INTO #RESULT (txt, duration) SELECT ''ALTER INDEX [' + i.name + '] on [' + sc.name + '].[' + o.name + '] REORGANIZE;'', CONVERT(varchar,GETDATE()-@StartTime,114); SET @StartTime = GETDATE();' as '再構成文_時間計測付き'
+FROM sys.indexes i
+INNER JOIN sys.objects o ON i.object_id = o.object_id
+INNER JOIN sys.schemas sc ON o.schema_id = sc.schema_id
+WHERE i.name IS NOT NULL
+AND o.type = 'U'
+ORDER BY o.name, i.type
