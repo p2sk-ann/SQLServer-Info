@@ -1,0 +1,36 @@
+declare @proc_name varchar(1000)
+set @proc_name = 'ProcedureName' --適宜書き換え
+
+select top 500
+    getdate() as collect_date,
+    object_name(ps.object_id, ps.database_id) as object_name,
+    ps.last_execution_time,
+    o.modify_date,
+    ps.execution_count,
+    cast(ps.total_worker_time*1.0 / ps.execution_count / 1000 as int) as avg_worker_time_ms,
+    cast(ps.total_worker_time / 1000.0 as int) as total_worker_time_ms,
+    cast(ps.last_worker_time / 1000.0 as int) as last_worker_time_ms,
+    cast(ps.min_worker_time / 1000.0 as int) as min_worker_time_ms,
+    cast(ps.max_worker_time / 1000.0 as int) as max_worker_time_ms,
+    cast(ps.total_elapsed_time / 1000.0 as int) as total_elapsed_time_ms,
+    cast(ps.last_elapsed_time / 1000.0 as int) as last_elapsed_time_ms,
+    cast(ps.min_elapsed_time / 1000.0 as int) as min_elapsed_time_ms,
+    cast(ps.max_elapsed_time / 1000.0 as int) as max_elapsed_time_ms,
+    ps.total_logical_writes,
+    ps.last_logical_writes,
+    ps.min_logical_writes,
+    ps.max_logical_writes,
+    ps.total_logical_reads,
+    ps.last_logical_reads,
+    ps.min_logical_reads,
+    ps.max_logical_reads,
+    ps.plan_handle,
+    text,
+    query_plan
+from
+    sys.dm_exec_procedure_stats  as ps
+    cross apply sys.dm_exec_sql_text(sql_handle)
+    cross apply sys.dm_exec_query_plan(plan_handle)
+    left join sys.objects as o
+        on o.object_id = ps.object_id
+where object_name(ps.object_id, ps.database_id) = @proc_name
