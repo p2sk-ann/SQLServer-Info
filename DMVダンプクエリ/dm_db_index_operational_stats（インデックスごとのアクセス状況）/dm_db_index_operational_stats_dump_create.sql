@@ -8,3 +8,6 @@ from sys.dm_db_index_operational_stats(db_id(), null, null, null) d
 left join sys.indexes i on d.OBJECT_ID = i.OBJECT_ID
 	and d.index_id = i.index_id
 where 1=0
+
+--古いデータ削除用
+create index IX_dm_db_index_operational_stats_dump_collect_date on dm_db_index_operational_stats_dump(collect_date)
