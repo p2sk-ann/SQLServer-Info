@@ -25,3 +25,6 @@ from sys.dm_exec_requests der
 join sys.dm_exec_sessions des on des.session_id = der.session_id
 outer apply sys.dm_exec_sql_text(sql_handle) as dest
 where 1 = 0
+
+--古いデータ削除用
+create index IX_dm_exec_requests_dump_collect_date on dm_exec_requests_dump(collect_date)
