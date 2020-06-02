@@ -4,4 +4,4 @@ select
 	,*
 from sys.dm_os_latch_stats
 where wait_time_ms > 0
-order by wait_Time_ms desc
+option(maxdop 1)
