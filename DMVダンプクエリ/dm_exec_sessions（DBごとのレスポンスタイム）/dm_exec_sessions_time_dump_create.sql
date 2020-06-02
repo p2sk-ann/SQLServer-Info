@@ -4,7 +4,7 @@ select
 	,db_name(database_id) as database_name
 	,datediff(MILLISECOND, last_request_start_time, last_request_end_time) as elapsed_time_ms
 	,count(*) as cnt
-into #dm_exec_sessions_time_dump
+into dm_exec_sessions_time_dump
 from sys.dm_exec_sessions
 where last_request_start_time is not null
 	and last_request_end_time is not null
