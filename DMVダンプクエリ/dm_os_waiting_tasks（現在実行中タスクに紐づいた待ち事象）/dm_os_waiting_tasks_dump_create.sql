@@ -26,3 +26,6 @@ left join sys.dm_exec_requests as er with (nolock) on er.session_id = wt.session
 left join sys.dm_exec_sessions as es with (nolock) on es.session_id = wt.session_id
 outer apply sys.dm_exec_input_buffer(wt.session_id, null) as ib
 where 1=0
+
+--古いデータ削除用
+create index IX_dm_os_waiting_tasks_dump_collect_date on dm_os_waiting_tasks_dump(collect_date)
