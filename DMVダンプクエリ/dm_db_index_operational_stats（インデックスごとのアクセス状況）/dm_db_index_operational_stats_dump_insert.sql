@@ -7,3 +7,4 @@ select
 from sys.dm_db_index_operational_stats(db_id(), null, null, null) d
 left join sys.indexes i on d.OBJECT_ID = i.OBJECT_ID
 	and d.index_id = i.index_id
+option(maxdop 1)
