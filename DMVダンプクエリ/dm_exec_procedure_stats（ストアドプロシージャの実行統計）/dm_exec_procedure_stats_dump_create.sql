@@ -31,3 +31,6 @@ from
   cross apply sys.dm_exec_query_plan(plan_handle)
   left join sys.objects as o on o.object_id = ps.object_id
 where 1 = 0
+
+--古いデータ削除用
+create index IX_dm_exec_procedure_stats_dump_collect_date on dm_exec_procedure_stats_dump(collect_date)
