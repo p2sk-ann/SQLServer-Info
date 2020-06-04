@@ -23,8 +23,8 @@ select top 500
   ps.min_logical_reads,
   ps.max_logical_reads,
   ps.plan_handle,
-  text,
-  query_plan
+  ps.sql_handle,
+  ps.object_id
 from
   sys.dm_exec_procedure_stats  as ps
   cross apply sys.dm_exec_sql_text(sql_handle)
