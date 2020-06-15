@@ -5,8 +5,8 @@ declare @sum_logical_reads bigint
 
 declare @snapshot_time_earlier datetime
 declare @snapshot_time_later datetime
-set @snapshot_time_earlier = '2019-12-13 04:42:02.390' --collect_dateに存在する日時を設定（古い方）
-set @snapshot_time_later = '2019-12-13 04:43:01.243' --collect_dateに存在する日時を設定（新しい方）
+set @snapshot_time_earlier = '2020-06-14 23:55:31.460' --collect_dateに存在する日時を設定（古い方）
+set @snapshot_time_later = '2020-06-15 00:00:35.580' --collect_dateに存在する日時を設定（新しい方）
 
 select
     @sum_worker_time = sum(total_worker_time),
@@ -33,6 +33,7 @@ from
     where creation_time >= @snapshot_time_earlier
     and collect_date = @snapshot_time_later
     and execution_count > 1 --実行頻度が少ないクエリを除外
+    and datediff(millisecond, creation_time, last_execution_time) > 0
 
     union
 
@@ -94,6 +95,7 @@ from
     where creation_time >= @snapshot_time_earlier
     and collect_date = @snapshot_time_later
     and execution_count > 1 --実行頻度が少ないクエリを除外
+    and datediff(millisecond, creation_time, last_execution_time) > 0
 
     union
 
