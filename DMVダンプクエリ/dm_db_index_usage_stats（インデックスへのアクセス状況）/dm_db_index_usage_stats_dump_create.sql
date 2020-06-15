@@ -15,3 +15,6 @@ left join sys.dm_db_index_usage_stats on sys.dm_db_partition_stats.object_id = s
                                       and sys.dm_db_partition_stats.index_id = sys.dm_db_index_usage_stats.index_id
 where
   1=0
+
+--古いデータ削除用
+create index IX_dm_db_index_usage_stats_dump_collect_date on dm_db_index_usage_stats_dump(collect_date)
