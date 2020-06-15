@@ -22,3 +22,4 @@ where
   or last_system_scan > dateadd(minute, -3, getdate())
   or last_system_lookup > dateadd(minute, -3, getdate())
   or last_system_update > dateadd(minute, -3, getdate())
+option(maxdop 1)
