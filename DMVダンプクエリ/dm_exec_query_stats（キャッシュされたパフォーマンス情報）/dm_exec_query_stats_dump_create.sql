@@ -28,3 +28,6 @@ from sys.dm_exec_query_stats qs
 outer apply sys.dm_exec_sql_text(qs.sql_handle) as qt
 where
   1=0
+
+--古いデータ削除用
+create index IX_dm_exec_query_stats_dump_collect_date on dm_exec_query_stats_dump(collect_date)
