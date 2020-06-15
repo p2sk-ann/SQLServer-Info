@@ -1,15 +1,16 @@
-SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+set transaction isolation level read uncommitted
+
 insert into dm_exec_query_stats_dump
-SELECT
+select
   getdate() as collect_date
   ,qt.dbid
-  ,qt.TEXT as parent_query
-  ,SUBSTRING(qt.TEXT, qs.statement_start_offset / 2, (
-      CASE 
-        WHEN qs.statement_end_offset = - 1
-          THEN LEN(CONVERT(NVARCHAR(MAX), qt.TEXT)) * 2
-        ELSE qs.statement_end_offset
-      END - qs.statement_start_offset
+  ,qt.text as parent_query
+  ,substring(qt.text, qs.statement_start_offset / 2, (
+      case 
+        when qs.statement_end_offset = - 1
+          then len(convert(nvarchar(max), qt.text)) * 2
+        else qs.statement_end_offset
+      end - qs.statement_start_offset
    ) / 2) as statement
   ,execution_count
   ,total_worker_time
@@ -22,8 +23,9 @@ SELECT
   ,max_dop
   ,last_execution_time
   ,creation_time
-FROM sys.dm_exec_query_stats qs
-OUTER APPLY sys.dm_exec_sql_text(qs.sql_handle) AS qt
-WHERE
-   last_execution_time > DATEADD(minute, -1, getdate())
-or creation_time > DATEADD(minute, -1, getdate())
+from sys.dm_exec_query_stats qs
+outer apply sys.dm_exec_sql_text(qs.sql_handle) as qt
+where
+   last_execution_time > dateadd(minute, -1, getdate())
+or creation_time > dateadd(minute, -1, getdate())
+option(maxdop 1)
