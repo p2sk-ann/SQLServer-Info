@@ -1,5 +1,5 @@
 select 
-   getdate as collect_date
+   getdate() as collect_date
   ,object_name(s.object_id) as object_name
   ,s.name as statistics_name
   ,c.name as column_name
