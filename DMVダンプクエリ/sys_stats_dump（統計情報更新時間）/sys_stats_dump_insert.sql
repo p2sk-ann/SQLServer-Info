@@ -15,6 +15,4 @@ where exists (
     where ss.name = object_name(s.object_id)
     )
 and stats_date(s.object_id, s.stats_id) > dateadd(minute, -3, getdate())
-order by stats_date(s.object_id, s.stats_id)
-  ,object_name
-  ,statistics_name
+option(maxdop 1)
