@@ -13,6 +13,7 @@ left join sys.indexes on sys.dm_db_partition_stats.object_id = sys.indexes.objec
                       and sys.dm_db_partition_stats.index_id = sys.indexes.index_id
 left join sys.dm_db_index_usage_stats on sys.dm_db_partition_stats.object_id = sys.dm_db_index_usage_stats.object_id
                                       and sys.dm_db_partition_stats.index_id = sys.dm_db_index_usage_stats.index_id
+                                      and sys.dm_db_index_usage_stats.database_id = db_id()
 where
   last_user_seek > dateadd(minute, -3, getdate())
   or last_user_scan > dateadd(minute, -3, getdate())
