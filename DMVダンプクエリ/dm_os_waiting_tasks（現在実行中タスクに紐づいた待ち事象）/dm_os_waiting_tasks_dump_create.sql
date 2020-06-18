@@ -20,6 +20,13 @@ select top 100
   ,ib.event_info
   ,ib.event_type
   ,ib.parameters
+  ,er.query_hash
+  ,er.query_plan_hash
+  ,er.cpu_time
+  ,er.total_elapsed_time
+  ,er.reads
+  ,er.writes
+  ,er.logical_reads
 into dm_os_waiting_tasks_dump
 from sys.dm_os_waiting_tasks as wt with (nolock)
 left join sys.dm_exec_requests as er with (nolock) on er.session_id = wt.session_id
