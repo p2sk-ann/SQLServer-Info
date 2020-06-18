@@ -23,6 +23,19 @@ select top 100
   ,der.reads
   ,der.writes
   ,der.logical_reads
+  ,der.query_hash
+  ,der.query_plan_hash
+  ,des.login_time
+  ,des.login_name
+  ,des.last_request_start_time
+  ,des.last_request_end_time
+  ,des.cpu_time as session_cpu_time
+  ,des.memory_usage
+  ,des.total_scheduled_time
+  ,des.total_elapsed_time
+  ,des.reads as session_reads
+  ,des.writes as session_writes
+  ,des.logical_reads as session_logical_reads
 into dm_exec_requests_dump
 from sys.dm_exec_requests der
 join sys.dm_exec_sessions des on des.session_id = der.session_id
