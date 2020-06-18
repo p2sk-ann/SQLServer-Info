@@ -21,7 +21,18 @@ select
   ,total_dop
   ,min_dop
   ,max_dop
+  ,max_worker_time
+  ,max_clr_time
+  ,max_elapsed_time
   ,last_execution_time
+  ,last_worker_time
+  ,last_clr_time
+  ,last_elapsed_time
+  ,plan_generation_num
+  ,total_rows
+  ,last_rows
+  ,min_rows
+  ,max_rows
   ,creation_time
 into dm_exec_query_stats_dump
 from sys.dm_exec_query_stats qs
