@@ -5,6 +5,7 @@ select
     ,left(colname, len(colname) - 1) as column_list
 	,(case when charindex('|', left(colname, len(colname) - 1), 1) > 1 then 1 else 0 end) as multi_column_flag --1 : 複数列の統計情報
     ,stats_date(s1.object_id, s1.stats_id) as statsdate --ここで統計情報の更新時間を確認できる
+into sys_stats_dump
 from sys.stats as s1
 inner join sys.stats_columns as sc on s1.object_id = sc.object_id
     and s1.stats_id = sc.stats_id and stats_column_id = 1
@@ -23,7 +24,6 @@ cross apply (
 	order by stats_column_id
 for xml PATH('')
 ) as a(colname)
-order by statistics_name
 where 1=0
 
 --古いデータ削除用
