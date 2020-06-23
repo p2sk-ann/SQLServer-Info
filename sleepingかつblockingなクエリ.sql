@@ -1,4 +1,4 @@
-SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED 
 select
     distinct 
     (SELECT text FROM sys.dm_exec_sql_text(sql_handle)) as txt,
