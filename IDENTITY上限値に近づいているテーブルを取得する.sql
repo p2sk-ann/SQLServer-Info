@@ -1,4 +1,4 @@
-DECLARE
+DECLARE 
      @Database sysname
     ,@sql nvarchar(2000)
 
