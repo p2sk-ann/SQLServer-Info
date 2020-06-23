@@ -34,3 +34,4 @@ WHERE i.name IS NOT NULL
 AND indexstats.avg_fragmentation_in_percent > @threshold_fragmentation_in_percent
 AND o.type = 'U'
 ORDER BY o.name, i.type
+ 
