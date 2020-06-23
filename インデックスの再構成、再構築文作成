@@ -1,4 +1,4 @@
-/*
+/* 
 時間計測時は以下のSQLを実行する
 
 set nocount on; create table #RESULT (txt varchar(4000), duration varchar(100)); DECLARE @StartTime datetime; SET @StartTime = GETDATE()
