@@ -1,4 +1,4 @@
-SELECT TOP 100
+SELECT TOP 100 
      der.session_id as spid
     ,der.blocking_session_id as blk_spid
     ,datediff(s, der.start_time, GETDATE()) as elapsed_sec
