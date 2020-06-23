@@ -1,4 +1,4 @@
-select
+select 
 	 session_id
 	,dop
 	,request_time
