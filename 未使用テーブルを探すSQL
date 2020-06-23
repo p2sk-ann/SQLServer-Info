@@ -1,4 +1,4 @@
-/*
+/* 
 @threasholdDate:
 未使用の判断につかう日付。
 各テーブルごとに、全インデックスのlast_user_seek/last_user_scan/last_user_lookup/last_user_updateの
