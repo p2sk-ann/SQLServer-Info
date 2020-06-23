@@ -12,4 +12,4 @@ SELECT
     sys.dm_os_schedulers
   WHERE
     scheduler_id < 256
-  ) as current_workers_count
+  ) as current_workers_count 
