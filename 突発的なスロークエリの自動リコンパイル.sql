@@ -1,4 +1,4 @@
-declare @CONST_profile_name varchar(30)
+declare @CONST_profile_name varchar(30) 
 declare @CONST_recipients varchar(200)
 declare @CONST_subject nvarchar(100) = @@SERVERNAME + N'多発したスロークエリのリコンパイル完了'
 declare @msg nvarchar(max) = ''
