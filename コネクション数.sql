@@ -4,4 +4,4 @@ SELECT
 	,COUNT(*) as connection_count
 FROM sys.sysprocesses
 GROUP BY
-	DB_NAME(dbid)
+	DB_NAME(dbid) 
