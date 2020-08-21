@@ -16,7 +16,7 @@ and object_name(ps.object_id, ps.database_id) not like 'sp[_]MS%' --レプリ系
 order by cached_time asc
 
 --クラスタ化インデックス作成
-create clustered index CIX_dm_exec_procedure_stats_usage_dump on dm_exec_procedure_stats_usage_dump(object_name)
+create clustered index CIX_dm_exec_procedure_stats_usage_dump on dm_exec_procedure_stats_usage_dump(object_name, database_name)
 
 --Unique制約作成
-alter table dm_exec_procedure_stats_usage_dump add constraint UQ_dm_exec_procedure_stats_usage_dump_object_name unique (object_name)   
+alter table dm_exec_procedure_stats_usage_dump add constraint UQ_dm_exec_procedure_stats_usage_dump unique (object_name, database_name)   
