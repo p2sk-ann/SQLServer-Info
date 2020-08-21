@@ -5,6 +5,7 @@ select
   db_name(ps.database_id) as database_name,
   ps.last_execution_time,
   o.modify_date as last_modify_date,
+  o.create_date as create_date,
   ps.cached_time as last_cached_time,
   ps.execution_count as last_execution_count
 into dm_exec_procedure_stats_usage_dump
@@ -13,6 +14,7 @@ from
   left join sys.objects as o on o.object_id = ps.object_id
 where object_name(ps.object_id, ps.database_id) is not null
 and object_name(ps.object_id, ps.database_id) not like 'sp[_]MS%' --レプリ系除外
+and db_name(ps.database_id) not in ('master', 'msdb', 'tempdb', 'model', 'distribution')
 order by cached_time asc
 
 --クラスタ化インデックス作成
