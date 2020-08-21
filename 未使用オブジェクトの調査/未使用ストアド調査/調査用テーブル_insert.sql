@@ -26,5 +26,5 @@ when matched then
 when not matched then
 	insert (first_insert_date, object_name, database_name, last_execution_time, last_modify_date, create_date, last_cached_time, last_execution_count)
 	values (source.first_insert_date, source.object_name, source.database_name, source.last_execution_time, source.modify_date, source.create_date, source.cached_time, source.execution_count)
-option (maxdop 1)
+option (maxdop 1) 
 ;
