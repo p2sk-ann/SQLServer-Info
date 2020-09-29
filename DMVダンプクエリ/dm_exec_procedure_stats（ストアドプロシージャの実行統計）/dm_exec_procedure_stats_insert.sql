@@ -4,6 +4,7 @@ select top 500
   object_name(ps.object_id, ps.database_id) as object_name,
   ps.last_execution_time,
   o.modify_date,
+  ps.database_id,
   ps.cached_time,
   ps.execution_count,
   ps.total_worker_time,
@@ -31,4 +32,5 @@ from
   cross apply sys.dm_exec_query_plan(plan_handle)
   left join sys.objects as o on o.object_id = ps.object_id
 where last_execution_time >= dateadd(minute, -1, getdate())
+and object_name(ps.object_id, ps.database_id) is not null
 option(maxdop 1)
