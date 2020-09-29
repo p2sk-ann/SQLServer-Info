@@ -3,6 +3,7 @@ select top 500
   object_name(ps.object_id, ps.database_id) as object_name,
   ps.last_execution_time,
   o.modify_date,
+  ps.database_id,
   ps.cached_time,
   ps.execution_count,
   ps.total_worker_time,
@@ -24,7 +25,6 @@ select top 500
   ps.plan_handle,
   ps.sql_handle,
   ps.object_id
-into dm_exec_procedure_stats_dump
 from
   sys.dm_exec_procedure_stats  as ps
   cross apply sys.dm_exec_sql_text(sql_handle)
