@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<DataCollectorSet>
+	<Status>1</Status>
+	<Duration>85800</Duration>
+	<Description>
+	</Description>
+	<DescriptionUnresolved>
+	</DescriptionUnresolved>
+	<DisplayName>
+	</DisplayName>
+	<DisplayNameUnresolved>
+	</DisplayNameUnresolved>
+	<SchedulesEnabled>-1</SchedulesEnabled>
+	<LatestOutputLocation></LatestOutputLocation>
+	<Name>Data Collector Set</Name>
+	<OutputLocation></OutputLocation>
+	<RootPath></RootPath>
+	<Segment>0</Segment>
+	<SegmentMaxDuration>0</SegmentMaxDuration>
+	<SegmentMaxSize>0</SegmentMaxSize>
+	<SerialNumber>136</SerialNumber>
+	<Server>
+	</Server>
+	<Subdirectory>
+	</Subdirectory>
+	<SubdirectoryFormat>3</SubdirectoryFormat>
+	<SubdirectoryFormatPattern>yyyyMMdd\-NNNNNN</SubdirectoryFormatPattern>
+	<Task>
+	</Task>
+	<TaskRunAsSelf>0</TaskRunAsSelf>
+	<TaskArguments>
+	</TaskArguments>
+	<TaskUserTextArguments>
+	</TaskUserTextArguments>
+	<UserAccount>SYSTEM</UserAccount>
+	<Security></Security>
+	<StopOnCompletion>0</StopOnCompletion>
+	<PerformanceCounterDataCollector>
+		<DataCollectorType>0</DataCollectorType>
+		<Name>DataCollector01</Name>
+		<FileName>DataCollector01</FileName>
+		<FileNameFormat>0</FileNameFormat>
+		<FileNameFormatPattern>
+		</FileNameFormatPattern>
+		<LogAppend>0</LogAppend>
+		<LogCircular>0</LogCircular>
+		<LogOverwrite>0</LogOverwrite>
+		<LatestOutputLocation></LatestOutputLocation>
+		<DataSourceName>
+		</DataSourceName>
+		<SampleInterval>5</SampleInterval>
+		<SegmentMaxRecords>0</SegmentMaxRecords>
+		<LogFileFormat>3</LogFileFormat>
+		<Counter>\Memory\*</Counter>
+		<Counter>\Network Interface(*)\*</Counter>
+		<Counter>\Server\Bytes Received/sec</Counter>
+		<Counter>\SQLServer:Access Methods\*</Counter>
+		<Counter>\SQLServer:Buffer Manager\*</Counter>
+		<Counter>\SQLServer:Buffer Node(*)\*</Counter>
+		<Counter>\SQLServer:General Statistics\*</Counter>
+		<Counter>\SQLServer:Latches\*</Counter>
+		<Counter>\SQLServer:Memory Manager\*</Counter>
+		<Counter>\SQLServer:Resource Pool Stats(*)\*</Counter>
+		<Counter>\SQLServer:SQL Statistics\*</Counter>
+		<Counter>\SQLServer:Wait Statistics(*)\*</Counter>
+		<Counter>\SQLServer:Workload Group Stats(*)\*</Counter>
+		<Counter>\System\*</Counter>
+		<Counter>\LogicalDisk(*)\*</Counter>
+		<Counter>\PhysicalDisk(*)\*</Counter>
+		<Counter>\Process(*)\*</Counter>
+		<Counter>\Processor(*)\*</Counter>
+		<Counter>\SQLServer:Databases(*)\*</Counter>
+		<Counter>\SQLServer:Locks(*)\*</Counter>
+		<Counter>\SQLServer:Plan Cache(*)\*</Counter>
+		<Counter>\SQLServer:SQL Errors(*)\*</Counter>
+		<Counter>\SQLServer:Batch Resp Statistics(*)\*</Counter>
+		<Counter>\Distributed Transaction Coordinator(*)\*</Counter>
+		<Counter>\SQLServer:Exec Statistics(*)\*</Counter>
+		<Counter>\SQLServer:Transactions\*</Counter>
+		<Counter>\SQLServer:Replication Dist.(*)\*</Counter>
+		<Counter>\SQLServer:Replication Logreader(*)\*</Counter>
+		<CounterDisplayName>\Memory\*</CounterDisplayName>
+		<CounterDisplayName>\Network Interface(*)\*</CounterDisplayName>
+		<CounterDisplayName>\Server\Bytes Received/sec</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Access Methods\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Buffer Manager\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Buffer Node(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:General Statistics\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Latches\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Memory Manager\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Resource Pool Stats(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:SQL Statistics\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Wait Statistics(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Workload Group Stats(*)\*</CounterDisplayName>
+		<CounterDisplayName>\System\*</CounterDisplayName>
+		<CounterDisplayName>\LogicalDisk(*)\*</CounterDisplayName>
+		<CounterDisplayName>\PhysicalDisk(*)\*</CounterDisplayName>
+		<CounterDisplayName>\Process(*)\*</CounterDisplayName>
+		<CounterDisplayName>\Processor(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Databases(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Locks(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Plan Cache(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:SQL Errors(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Batch Resp Statistics(*)\*</CounterDisplayName>
+		<CounterDisplayName>\Distributed Transaction Coordinator(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Exec Statistics(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Transactions\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Replication Dist.(*)\*</CounterDisplayName>
+		<CounterDisplayName>\SQLServer:Replication Logreader(*)\*</CounterDisplayName>
+	</PerformanceCounterDataCollector>
+	<Schedule>
+		<StartDate>4/13/2020</StartDate>
+		<EndDate>
+		</EndDate>
+		<StartTime>3:00:00 PM</StartTime>
+		<Days>127</Days>
+	</Schedule>
+	<DataManager>
+		<Enabled>-1</Enabled>
+		<CheckBeforeRunning>-1</CheckBeforeRunning>
+		<MinFreeDisk>100000</MinFreeDisk>
+		<MaxSize>0</MaxSize>
+		<MaxFolderCount>10</MaxFolderCount>
+		<ResourcePolicy>1</ResourcePolicy>
+		<ReportFileName>report.html</ReportFileName>
+		<RuleTargetFileName>report.xml</RuleTargetFileName>
+		<EventsFileName>
+		</EventsFileName>
+	</DataManager>
+</DataCollectorSet>
