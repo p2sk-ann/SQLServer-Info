@@ -12,10 +12,7 @@ into dm_exec_procedure_stats_usage_dump
 from
   sys.dm_exec_procedure_stats  as ps
   left join sys.objects as o on o.object_id = ps.object_id
-where object_name(ps.object_id, ps.database_id) is not null
-and object_name(ps.object_id, ps.database_id) not like 'sp[_]MS%' --レプリ系除外
-and db_name(ps.database_id) not in ('master', 'msdb', 'tempdb', 'model', 'distribution')
-order by cached_time asc
+where 1=0
 
 --クラスタ化インデックス作成
 create clustered index CIX_dm_exec_procedure_stats_usage_dump on dm_exec_procedure_stats_usage_dump(object_name, database_name)
