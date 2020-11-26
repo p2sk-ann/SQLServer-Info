@@ -5,6 +5,7 @@ set @end = '2020/10/23 00:00:00'
 select
      a.object_name
     ,a.collect_date
+    ,case when (a.execution_count - b.execution_count) = 0 then 0 else (a.total_worker_time - b.total_worker_time) - (a.execution_count - b.execution_count) end as avg_worker_time
     ,(a.execution_count - b.execution_count) as execution_count
     ,(a.total_worker_time - b.total_worker_time) as total_worker_time
     ,a.last_worker_time
