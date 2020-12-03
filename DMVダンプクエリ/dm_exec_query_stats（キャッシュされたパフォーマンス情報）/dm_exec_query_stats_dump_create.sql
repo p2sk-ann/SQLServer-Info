@@ -34,6 +34,18 @@ select
   ,min_rows
   ,max_rows
   ,creation_time
+  ,total_grant_kb
+  ,last_grant_kb
+  ,min_grant_kb
+  ,max_grant_kb
+  ,total_used_grant_kb
+  ,last_used_grant_kb
+  ,min_used_grant_kb
+  ,max_used_grant_kb
+  ,total_ideal_grant_kb
+  ,last_ideal_grant_kb
+  ,min_ideal_grant_kb
+  ,max_ideal_grant_kb                 
 into dm_exec_query_stats_dump
 from sys.dm_exec_query_stats qs
 outer apply sys.dm_exec_sql_text(qs.sql_handle) as qt
