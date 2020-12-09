@@ -76,7 +76,7 @@ select
     *
     ,total_worker_time / execution_count as avg_worker_time
     ,total_elapsed_time / execution_count as avg_elapsed_time
-    ,total_gran_kb / execution_count as avg_gran_kb
+    ,total_grant_kb / execution_count as avg_gran_kb
     ,total_worker_time*100.0 / @sum_worker_time as percentage_worker_time
     ,total_elapsed_time*100.0 / @sum_elapsed_time as percentage_elapsed_time
     ,execution_count*100.0 / @sum_execution_count as percentage_execution_count
