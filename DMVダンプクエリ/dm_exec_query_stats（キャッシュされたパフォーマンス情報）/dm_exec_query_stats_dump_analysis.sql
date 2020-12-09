@@ -2,17 +2,19 @@ declare @sum_worker_time bigint
 declare @sum_execution_count bigint
 declare @sum_elapsed_time bigint
 declare @sum_logical_reads bigint
+declare @sum_grant_kb bigint
 
 declare @snapshot_time_earlier datetime
 declare @snapshot_time_later datetime
-set @snapshot_time_earlier = '2020-06-14 23:55:31.460' --collect_dateに存在する日時を設定（古い方）
-set @snapshot_time_later = '2020-06-15 00:00:35.580' --collect_dateに存在する日時を設定（新しい方）
+set @snapshot_time_earlier = '2020-12-10 00:10:10.100' --collect_dateに存在する日時を設定（古い方）
+set @snapshot_time_later = '2020-12-10 00:15:10.117' --collect_dateに存在する日時を設定（新しい方）
 
 select
     @sum_worker_time = sum(total_worker_time),
     @sum_execution_count = sum(execution_count),
     @sum_elapsed_time = sum(total_elapsed_time),
-    @sum_logical_reads = sum(total_logical_reads)
+    @sum_logical_reads = sum(total_logical_reads),
+    @sum_grant_kb = sum(total_grant_kb)
 from
 (
     select
@@ -26,6 +28,7 @@ from
         ,total_worker_time * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_worker_time
         ,total_elapsed_time * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_elapsed_time
         ,total_logical_reads * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_logical_reads
+        ,total_grant_kb * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_grant_kb
         ,total_dop
         ,min_dop
         ,max_dop
@@ -47,6 +50,7 @@ from
         ,(a.total_worker_time - b.total_worker_time) as total_worker_time
         ,(a.total_elapsed_time - b.total_elapsed_time) as total_elapsed_time
         ,(a.total_logical_reads - b.total_logical_reads) as total_logical_reads
+        ,(a.total_grant_kb - b.total_grant_kb) as total_grant_kb
         ,(a.total_dop - b.total_dop) as total_dop
         ,a.min_dop
         ,a.max_dop
@@ -76,6 +80,7 @@ select
     ,total_elapsed_time*100.0 / @sum_elapsed_time as percentage_elapsed_time
     ,execution_count*100.0 / @sum_execution_count as percentage_execution_count
     ,total_logical_reads*100.0 / @sum_logical_reads as percentage_logical_reads
+    ,total_grant_kb*100.0 / @sum_grant_kb as percentage_grant_kb
 from
 (
     select
@@ -88,6 +93,7 @@ from
         ,total_worker_time * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_worker_time
         ,total_elapsed_time * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_elapsed_time
         ,total_logical_reads * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_logical_reads
+        ,total_grant_kb * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_grant_kb
         ,total_dop
         ,min_dop
         ,max_dop
@@ -109,6 +115,7 @@ from
         ,(a.total_worker_time - b.total_worker_time) as total_worker_time
         ,(a.total_elapsed_time - b.total_elapsed_time) as total_elapsed_time
         ,(a.total_logical_reads - b.total_logical_reads) as total_logical_reads
+        ,(a.total_grant_kb - b.total_grant_kb) as total_grant_kb
         ,(a.total_dop - b.total_dop) as total_dop
         ,a.min_dop
         ,a.max_dop
@@ -129,4 +136,4 @@ from
     on a.parent_query = b.parent_query and a.statement = b.statement and a.creation_time = b.creation_time
     where (a.execution_count - b.execution_count) > 1 --実行頻度が少ないクエリを除外
 ) as c
-order by total_worker_time desc
+order by total_grant_kb desc
