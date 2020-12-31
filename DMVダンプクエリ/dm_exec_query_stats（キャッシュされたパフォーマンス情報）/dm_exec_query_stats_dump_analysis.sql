@@ -6,8 +6,12 @@ declare @sum_grant_kb bigint
 
 declare @snapshot_time_earlier datetime
 declare @snapshot_time_later datetime
-set @snapshot_time_earlier = '2020-12-10 00:10:10.100' --collect_dateに存在する日時を設定（古い方）
-set @snapshot_time_later = '2020-12-10 00:15:10.117' --collect_dateに存在する日時を設定（新しい方）
+
+select
+	 @snapshot_time_earlier = min(collect_date) --collect_dateに存在する日時を設定（古い方）
+	,@snapshot_time_later = max(collect_date) --collect_dateに存在する日時を設定（新しい方）
+from dm_exec_query_stats_dump with(nolock)
+where collect_date between '2021/1/1 00:00' and '2021/1/1 00:15'
 
 select
     @sum_worker_time = sum(total_worker_time),
