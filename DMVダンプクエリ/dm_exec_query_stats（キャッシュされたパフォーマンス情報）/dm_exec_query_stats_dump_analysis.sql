@@ -1,3 +1,5 @@
+set transaction isolation level read uncommitted
+
 declare @sum_worker_time bigint
 declare @sum_execution_count bigint
 declare @sum_elapsed_time bigint
