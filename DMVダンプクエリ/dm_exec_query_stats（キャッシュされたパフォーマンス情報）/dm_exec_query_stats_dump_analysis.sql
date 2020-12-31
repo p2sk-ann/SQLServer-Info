@@ -13,6 +13,8 @@ select
 from dm_exec_query_stats_dump with(nolock)
 where collect_date between '2021/1/1 00:00' and '2021/1/1 00:15'
 
+select @snapshot_time_earlier, @snapshot_time_later
+
 select
     @sum_worker_time = sum(total_worker_time),
     @sum_execution_count = sum(execution_count),
