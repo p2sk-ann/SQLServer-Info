@@ -37,6 +37,7 @@ select top 100
   ,des.reads as session_reads
   ,des.writes as session_writes
   ,des.logical_reads as session_logical_reads
+  ,der.scheduler_id
 from sys.dm_exec_requests der
 join sys.dm_exec_sessions des on des.session_id = der.session_id
 outer apply sys.dm_exec_sql_text(sql_handle) as dest
