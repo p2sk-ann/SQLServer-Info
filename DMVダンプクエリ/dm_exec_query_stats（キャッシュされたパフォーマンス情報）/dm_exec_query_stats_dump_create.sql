@@ -45,7 +45,9 @@ select
   ,total_ideal_grant_kb
   ,last_ideal_grant_kb
   ,min_ideal_grant_kb
-  ,max_ideal_grant_kb                 
+  ,max_ideal_grant_kb
+  ,query_hash
+  ,query_plan_hash
 into dm_exec_query_stats_dump
 from sys.dm_exec_query_stats qs
 outer apply sys.dm_exec_sql_text(qs.sql_handle) as qt
