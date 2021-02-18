@@ -1,5 +1,5 @@
 insert into dm_exec_requests_dump
-select top 100
+select top 200
    getdate() as collect_date
   ,der.session_id as spid
   ,der.blocking_session_id as blk_spid
@@ -44,4 +44,5 @@ outer apply sys.dm_exec_sql_text(sql_handle) as dest
 where des.is_user_process = 1
   and datediff(s, der.start_time, getdate()) >= 1
   and datediff(s, der.start_time, getdate()) < (3600 * 10)
+order by datediff(s, der.start_time, getdate()) desc
 option (maxdop 1)
