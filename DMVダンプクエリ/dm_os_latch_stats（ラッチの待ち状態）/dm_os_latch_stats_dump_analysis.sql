@@ -33,6 +33,7 @@ from
 
 select
     *
+    ,(case when waiting_requests_count = 0 then 0 else wait_time_ms / waiting_requests_count end) as avg_wait_time_ms
     ,(100.0 * waiting_requests_count / (1+@total_waiting_requests_count)) as percent_waiting_requests_count
     ,(100.0 * wait_time_ms / (1+@total_wait_time_ms)) as percent_wait_time_ms
 from
