@@ -1,4 +1,4 @@
-INSERT INTO INTO dm_os_tasks_dump
+INSERT INTO dm_os_tasks_dump
 SELECT 
 	 getdate() as collect_date
 	,ot.session_id
