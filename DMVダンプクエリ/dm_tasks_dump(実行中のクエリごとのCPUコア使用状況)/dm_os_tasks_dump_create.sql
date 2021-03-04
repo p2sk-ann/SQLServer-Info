@@ -23,3 +23,6 @@ OUTER APPLY sys.dm_exec_sql_text(sql_handle) AS dest
 WHERE task_state = 'RUNNING'
 GROUP BY ot.session_id
 ORDER BY count(*) DESC
+
+--古いデータ削除用
+create index IX_dm_os_tasks_dump_collect_date on dm_os_tasks_dump(collect_date)
