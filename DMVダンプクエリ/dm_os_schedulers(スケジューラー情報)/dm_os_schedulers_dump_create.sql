@@ -5,3 +5,6 @@ select
     ,*
 into dm_os_schedulers_dump
 from sys.dm_os_schedulers
+
+--古いデータ削除用
+create index IX_dm_os_schedulers_dump_collect_date on dm_os_schedulers_dump(collect_date)
