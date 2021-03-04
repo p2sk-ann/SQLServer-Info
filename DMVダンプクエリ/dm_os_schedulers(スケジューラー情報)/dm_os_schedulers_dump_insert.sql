@@ -5,3 +5,4 @@ select
     getdate() as collect_date
     ,*
 from sys.dm_os_schedulers
+option (maxdop 1)
