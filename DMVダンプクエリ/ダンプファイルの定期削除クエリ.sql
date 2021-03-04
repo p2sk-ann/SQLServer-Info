@@ -50,3 +50,13 @@ if exists (select * from sys.objects where name = 'dm_io_virtual_file_stats_dump
 begin
     delete top (100000) from dm_io_virtual_file_stats_dump where collect_date < dateadd(day, -10, getdate())
 end
+
+if exists (select * from sys.objects where name = 'dm_os_schedulers_dump')
+begin
+    delete top (100000) from dm_os_schedulers_dump where collect_date < dateadd(day, -10, getdate())
+end
+
+if exists (select * from sys.objects where name = 'dm_tasks_dump')
+begin
+    delete top (100000) from dm_tasks_dump where collect_date < dateadd(day, -10, getdate())
+end
