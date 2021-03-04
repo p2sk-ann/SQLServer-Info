@@ -1,7 +1,7 @@
 SELECT 
-         getdate() as collect_date
-        ,ot.session_id
-        ,count(*) AS current_using_cpu_count
+	 getdate() as collect_date
+	,ot.session_id
+	,count(*) AS current_using_cpu_count
 	,cast(count(*) * 100.0 / (
 			SELECT cpu_count
 			FROM sys.dm_os_sys_info
