@@ -293,7 +293,7 @@ where wt.session_id > 50
   and er.status <> 'background'
 option (maxdop 1)
 
-INSERT INTO INTO dm_os_tasks_dump
+INSERT INTO dm_os_tasks_dump
 SELECT 
 	 getdate() as collect_date
 	,ot.session_id
