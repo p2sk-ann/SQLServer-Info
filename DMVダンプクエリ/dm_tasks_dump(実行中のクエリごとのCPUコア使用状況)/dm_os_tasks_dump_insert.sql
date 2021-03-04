@@ -23,3 +23,4 @@ OUTER APPLY sys.dm_exec_sql_text(sql_handle) AS dest
 WHERE task_state = 'RUNNING'
 GROUP BY ot.session_id
 ORDER BY count(*) DESC
+option (maxdop 1)
