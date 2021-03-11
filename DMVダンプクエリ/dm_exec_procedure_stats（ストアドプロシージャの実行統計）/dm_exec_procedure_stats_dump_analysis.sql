@@ -6,8 +6,14 @@ declare @total_total_logical_reads bigint
 
 declare @snapshot_time_earlier datetime
 declare @snapshot_time_later datetime
-set @snapshot_time_earlier = '2020-06-21 23:55:11.480' --collect_dateに存在する日時を設定（古い方）
-set @snapshot_time_later = '2020-06-22 00:00:16.550' --collect_dateに存在する日時を設定（新しい方）
+
+select
+	 @snapshot_time_earlier = min(collect_date) --collect_dateに存在する日時を設定（古い方）
+	,@snapshot_time_later = max(collect_date) --collect_dateに存在する日時を設定（新しい方）
+from dm_exec_query_stats_dump with(nolock)
+where collect_date between '2021/1/1 00:00' and '2021/1/1 00:15'
+
+select @snapshot_time_earlier, @snapshot_time_later
 
 select
      @total_execution_count = sum(execution_count)
