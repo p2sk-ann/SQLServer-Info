@@ -120,3 +120,6 @@ FROM
         WHERE dateadd(HOUR, +9, cast(event_data.value('(/event/@timestamp)[1]', 'datetime2(0)') as datetime)) between @begin_time and @end_time
     ) AS T
 ) AS T
+
+--古いデータ削除用
+create index IX_xevent_dump_time_stamp_event_type on xevent_dump(time_stamp, event_type)
