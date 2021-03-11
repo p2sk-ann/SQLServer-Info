@@ -10,8 +10,8 @@ declare @snapshot_time_later datetime
 select
 	 @snapshot_time_earlier = min(collect_date) --collect_dateに存在する日時を設定（古い方）
 	,@snapshot_time_later = max(collect_date) --collect_dateに存在する日時を設定（新しい方）
-from dm_exec_query_stats_dump with(nolock)
-where collect_date between '2021/1/1 00:00' and '2021/1/1 00:15'
+from dm_exec_procedure_stats_dump with(nolock)
+where collect_date between '2021/3/1 15:00' and '2021/3/1 15:15'
 
 select @snapshot_time_earlier, @snapshot_time_later
 
