@@ -10,3 +10,7 @@ getdate() as collect_date
 into dm_db_file_space_usage_tempdb_dump
 from tempdb.sys.dm_db_file_space_usage --現在のDBの状況が返ってくるので「tempdb.」をつける
 option (maxdop 1)
+
+
+--古いデータ削除用
+create index IX_dm_db_file_space_usage_tempdb_dump_collect_date on dm_db_file_space_usage_tempdb_dump(collect_date)
