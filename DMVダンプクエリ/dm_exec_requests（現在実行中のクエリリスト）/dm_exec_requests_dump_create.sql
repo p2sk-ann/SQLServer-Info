@@ -1,3 +1,5 @@
+drop table dm_exec_requests_dump
+
 select top 100
    getdate() as collect_date
   ,der.session_id as spid
@@ -19,7 +21,6 @@ select top 100
   ,der.percent_complete
   ,der.cpu_time
   ,(case der.transaction_isolation_level when 0 then 'Unspecified' when 1 then 'ReadUncomitted' when 2 then 'ReadCommitted' when 3 then 'Repeatable' when 4 then 'Serializable' when 5 then 'Snapshot' else cast(der.transaction_isolation_level as varchar) end) as transaction_isolation_level
-  ,der.granted_query_memory * 8 as granted_query_memory_kb
   ,der.reads
   ,der.writes
   ,der.logical_reads
@@ -37,10 +38,21 @@ select top 100
   ,des.writes as session_writes
   ,des.logical_reads as session_logical_reads
   ,der.scheduler_id
+  ,dop
+  ,deq.grant_time
+  ,deq.granted_memory_kb
+  ,deq.requested_memory_kb
+  ,deq.required_memory_kb
+  ,deq.used_memory_kb
+  ,deq.max_used_memory_kb
+  ,deq.query_cost
+  ,deq.queue_id
+  ,deq.wait_order
 into dm_exec_requests_dump
 from sys.dm_exec_requests der
 join sys.dm_exec_sessions des on des.session_id = der.session_id
-outer apply sys.dm_exec_sql_text(sql_handle) as dest
+join sys.dm_exec_query_memory_grants deq on deq.session_id = der.session_id
+outer apply sys.dm_exec_sql_text(der.sql_handle) as dest
 where 1 = 0
 
 --古いデータ削除用
