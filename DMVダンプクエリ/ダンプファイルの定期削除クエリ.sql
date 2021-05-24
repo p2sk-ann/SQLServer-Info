@@ -60,3 +60,9 @@ if exists (select * from sys.objects where name = 'dm_tasks_dump')
 begin
     delete top (100000) from dm_tasks_dump where collect_date < dateadd(day, -10, getdate())
 end
+
+--日次でのINSERTなので余裕がある。1年間保持
+if exists (select * from sys.objects where name = 'dm_db_index_usage_stats_dump_full')
+begin
+    delete top (100000) from dm_db_index_usage_stats_dump_full where collect_date < dateadd(day, -360, getdate())
+end
