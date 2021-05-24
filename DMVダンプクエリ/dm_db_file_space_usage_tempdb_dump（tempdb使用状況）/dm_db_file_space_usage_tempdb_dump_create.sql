@@ -9,3 +9,4 @@ getdate() as collect_date
 ,sum(mixed_extent_page_count) * 8 / 1024.0 as sum_mixed_extent_page_size_mb --今は単一エクステントが基本のはず
 into dm_db_file_space_usage_tempdb_dump
 from tempdb.sys.dm_db_file_space_usage --現在のDBの状況が返ってくるので「tempdb.」をつける
+option (maxdop 1)
