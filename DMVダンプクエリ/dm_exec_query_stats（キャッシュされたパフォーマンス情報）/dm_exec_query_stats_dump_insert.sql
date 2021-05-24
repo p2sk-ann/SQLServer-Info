@@ -51,7 +51,7 @@ select
   ,query_hash
   ,query_plan_hash
 from sys.dm_exec_query_stats qs
-outer apply sys.dm_exec_sql_text(qs.sql_handle) as qt
+outer apply sys.dm_exec_sql_text(qs.plan_handle) as qt
 where
    last_execution_time > dateadd(minute, -1, getdate())
 or creation_time > dateadd(minute, -1, getdate())
