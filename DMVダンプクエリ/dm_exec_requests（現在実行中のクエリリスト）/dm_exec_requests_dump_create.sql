@@ -51,7 +51,7 @@ select top 100
 into dm_exec_requests_dump
 from sys.dm_exec_requests der
 join sys.dm_exec_sessions des on des.session_id = der.session_id
-join sys.dm_exec_query_memory_grants deq on deq.session_id = der.session_id
+left join sys.dm_exec_query_memory_grants deq on deq.session_id = der.session_id
 outer apply sys.dm_exec_sql_text(der.sql_handle) as dest
 where 1 = 0
 
