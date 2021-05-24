@@ -50,7 +50,7 @@ select
   ,query_plan_hash
 into dm_exec_query_stats_dump
 from sys.dm_exec_query_stats qs
-outer apply sys.dm_exec_sql_text(qs.sql_handle) as qt
+outer apply sys.dm_exec_sql_text(qs.plan_handle) as qt
 where
   1=0
 
