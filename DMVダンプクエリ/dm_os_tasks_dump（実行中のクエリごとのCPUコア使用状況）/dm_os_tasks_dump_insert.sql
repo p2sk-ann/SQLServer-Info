@@ -1,26 +1,26 @@
-INSERT INTO dm_os_tasks_dump
-SELECT 
-	 getdate() as collect_date
-	,ot.session_id
-	,count(*) AS current_using_cpu_count
-	,cast(count(*) * 100.0 / (
-			SELECT cpu_count
-			FROM sys.dm_os_sys_info
-			) AS NUMERIC(4, 1)) AS cpu_percentage
-	,count(*) OVER () AS all_using_cpu_count
-	,cast(count(*) OVER () * 100.0 / (
-			SELECT cpu_count
-			FROM sys.dm_os_sys_info
-			) AS NUMERIC(4, 1)) AS current_cpu_percent
-	,max(es.STATUS) AS STATUS
-	,max(host_name) AS host_name
-	,max(program_name) AS program_name
-	,max(TEXT) AS qery_text
-FROM sys.dm_os_tasks ot WITH (NOLOCK)
-LEFT JOIN sys.dm_exec_sessions es WITH (NOLOCK) ON ot.session_id = es.session_id
-LEFT JOIN sys.dm_exec_requests er WITH (NOLOCK) ON ot.session_id = er.session_id
-OUTER APPLY sys.dm_exec_sql_text(sql_handle) AS dest
-WHERE task_state = 'RUNNING'
-GROUP BY ot.session_id
-ORDER BY count(*) DESC
+insert into dm_os_tasks_dump
+select 
+   getdate() as collect_date
+  ,ot.session_id
+  ,count(*) as current_using_cpu_count
+  ,cast(count(*) * 100.0 / (
+      select cpu_count
+      from sys.dm_os_sys_info
+      ) as numeric(4, 1)) as cpu_percentage
+  ,count(*) over () as all_using_cpu_count
+  ,cast(count(*) over () * 100.0 / (
+      select cpu_count
+      from sys.dm_os_sys_info
+      ) as numeric(4, 1)) as current_cpu_percent
+  ,max(es.status) as status
+  ,max(host_name) as host_name
+  ,max(program_name) as program_name
+  ,max(text) as qery_text
+from sys.dm_os_tasks ot with (nolock)
+left join sys.dm_exec_sessions es with (nolock) on ot.session_id = es.session_id
+left join sys.dm_exec_requests er with (nolock) on ot.session_id = er.session_id
+outer apply sys.dm_exec_sql_text(sql_handle) as dest
+where task_state = 'running'
+group by ot.session_id
+order by count(*) desc
 option (maxdop 1)
