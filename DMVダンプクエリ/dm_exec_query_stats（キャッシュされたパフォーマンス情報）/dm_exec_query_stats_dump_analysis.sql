@@ -43,7 +43,7 @@ from
         ,total_dop
         ,min_dop
         ,max_dop
-        ,(case when @estimate_mode = 1 then 'estimated' else 'calculated_partially' end) as type
+        ,(case when @estimate_mode = 1 then 'estimated' else 'raw' end) as type -- estimated:推定した値 / raw:生データ。ただし計測期間の中でコンパイル or 再コンパイルされている / calculated:計測基幹のstart/endの差分を計算した値
     from dm_exec_query_stats_dump
     where creation_time >= @snapshot_time_earlier
     and collect_date = @snapshot_time_later
@@ -111,7 +111,7 @@ from
         ,total_dop
         ,min_dop
         ,max_dop
-        ,(case when @estimate_mode = 1 then 'estimated' else 'calculated_partially' end) as type
+        ,(case when @estimate_mode = 1 then 'estimated' else 'raw' end) as type -- estimated:推定した値 / raw:生データ。ただし計測期間の中でコンパイル or 再コンパイルされている / calculated:計測基幹のstart/endの差分を計算した値
     from dm_exec_query_stats_dump
     where creation_time >= @snapshot_time_earlier
     and collect_date = @snapshot_time_later
