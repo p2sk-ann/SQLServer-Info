@@ -1,5 +1,7 @@
 set transaction isolation level read uncommitted
 
+declare @estimate_mode bit = 1 --1:estimation on / 0:estimation off
+
 declare @sum_worker_time bigint
 declare @sum_execution_count bigint
 declare @sum_elapsed_time bigint
@@ -31,12 +33,13 @@ from
         ,statement
         ,creation_time
         ,last_execution_time
-        --(@snapshot_time_later - @snapshot_time_earlier)の時間間隔における実行時間やCPU時間に変換
-        ,execution_count * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as execution_count
-        ,total_worker_time * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_worker_time
-        ,total_elapsed_time * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_elapsed_time
-        ,total_logical_reads * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_logical_reads
-        ,total_grant_kb * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_grant_kb
+        --@estimate_mode=1なら、(@snapshot_time_later - @snapshot_time_earlier)の時間間隔における実行時間やCPU時間に変換
+        --@estimate_mode=0なら、そのままの値
+        ,execution_count * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as execution_count
+        ,total_worker_time * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as total_worker_time
+        ,total_elapsed_time * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as total_elapsed_time
+        ,total_logical_reads * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as total_logical_reads
+        ,total_grant_kb * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as total_grant_kb
         ,total_dop
         ,min_dop
         ,max_dop
@@ -100,11 +103,11 @@ from
         ,statement
         ,creation_time
         ,last_execution_time
-        ,execution_count * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as execution_count
-        ,total_worker_time * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_worker_time
-        ,total_elapsed_time * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_elapsed_time
-        ,total_logical_reads * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_logical_reads
-        ,total_grant_kb * (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) as total_grant_kb
+        ,execution_count * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as execution_count
+        ,total_worker_time * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as total_worker_time
+        ,total_elapsed_time * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as total_elapsed_time
+        ,total_logical_reads * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as total_logical_reads
+        ,total_grant_kb * (case when @estimate_mode = 1 then (datediff(millisecond, @snapshot_time_earlier, @snapshot_time_later) / datediff(millisecond, creation_time, last_execution_time)) else 1 end) as total_grant_kb
         ,total_dop
         ,min_dop
         ,max_dop
