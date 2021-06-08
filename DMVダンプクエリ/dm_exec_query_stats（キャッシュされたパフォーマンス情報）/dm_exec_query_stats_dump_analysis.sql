@@ -1,6 +1,6 @@
 set transaction isolation level read uncommitted
 
-declare @estimate_mode bit = 1 --1:estimation on / 0:estimation off
+declare @estimate_mode bit = 0 --1:estimation on / 0:estimation off
 
 declare @sum_worker_time bigint
 declare @sum_execution_count bigint
@@ -43,7 +43,7 @@ from
         ,total_dop
         ,min_dop
         ,max_dop
-        ,'estimated' as type
+        ,(case when @estimate_mode = 1 then 'estimated' else 'calculated_partially' end) as type
     from dm_exec_query_stats_dump
     where creation_time >= @snapshot_time_earlier
     and collect_date = @snapshot_time_later
@@ -111,7 +111,7 @@ from
         ,total_dop
         ,min_dop
         ,max_dop
-        ,'estimated' as type
+        ,(case when @estimate_mode = 1 then 'estimated' else 'calculated_partially' end) as type
     from dm_exec_query_stats_dump
     where creation_time >= @snapshot_time_earlier
     and collect_date = @snapshot_time_later
