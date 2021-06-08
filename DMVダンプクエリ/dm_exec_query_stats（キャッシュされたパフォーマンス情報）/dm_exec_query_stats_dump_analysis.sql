@@ -13,7 +13,7 @@ select
 	 @snapshot_time_earlier = min(collect_date) --collect_dateに存在する日時を設定（古い方）
 	,@snapshot_time_later = max(collect_date) --collect_dateに存在する日時を設定（新しい方）
 from dm_exec_query_stats_dump with(nolock)
-where collect_date between '2021/1/1 00:00' and '2021/1/1 00:15'
+where collect_date between '2021/06/07 09:00' and '2021/06/07 10:00'
 
 select @snapshot_time_earlier, @snapshot_time_later
 
@@ -40,6 +40,7 @@ from
         ,total_dop
         ,min_dop
         ,max_dop
+        ,'estimated' as type
     from dm_exec_query_stats_dump
     where creation_time >= @snapshot_time_earlier
     and collect_date = @snapshot_time_later
@@ -62,6 +63,7 @@ from
         ,(a.total_dop - b.total_dop) as total_dop
         ,a.min_dop
         ,a.max_dop
+        ,'calculated' as type
     from
     (
         select * from
@@ -106,6 +108,7 @@ from
         ,total_dop
         ,min_dop
         ,max_dop
+        ,'estimated' as type
     from dm_exec_query_stats_dump
     where creation_time >= @snapshot_time_earlier
     and collect_date = @snapshot_time_later
@@ -128,6 +131,7 @@ from
         ,(a.total_dop - b.total_dop) as total_dop
         ,a.min_dop
         ,a.max_dop
+        ,'calculated' as type
     from
     (
         select * from
@@ -145,4 +149,4 @@ from
     on a.parent_query = b.parent_query and a.statement = b.statement and a.creation_time = b.creation_time
     where (a.execution_count - b.execution_count) > 1 --実行頻度が少ないクエリを除外
 ) as c
-order by total_grant_kb desc
+order by percentage_worker_time desc
