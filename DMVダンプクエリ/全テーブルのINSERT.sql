@@ -131,6 +131,7 @@ select top (1000)
   object_name(ps.object_id, ps.database_id) as object_name,
   ps.last_execution_time,
   o.modify_date,
+  ps.database_id,
   ps.cached_time,
   ps.execution_count,
   ps.total_worker_time,
