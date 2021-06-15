@@ -1,5 +1,3 @@
-drop table dm_exec_requests_dump
-
 select top 100
    getdate() as collect_date
   ,der.session_id as spid
