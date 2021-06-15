@@ -15,7 +15,7 @@ select
   ,max(host_name) as host_name
   ,max(program_name) as program_name
   ,max(text) as qery_text
-insert into dm_os_tasks_dump
+into dm_os_tasks_dump
 from sys.dm_os_tasks ot with (nolock)
 left join sys.dm_exec_sessions es with (nolock) on ot.session_id = es.session_id
 left join sys.dm_exec_requests er with (nolock) on ot.session_id = er.session_id
