@@ -15,7 +15,7 @@ select
 	 @snapshot_time_earlier = min(collect_date) --collect_dateに存在する日時を設定（古い方）
 	,@snapshot_time_later = max(collect_date) --collect_dateに存在する日時を設定（新しい方）
 from dm_exec_query_stats_dump with(nolock)
-where collect_date between '2021/06/07 09:00' and '2021/06/07 10:00'
+where collect_date between '2021/06/15 22:30' and '2021/06/15 23:00'
 
 select @snapshot_time_earlier, @snapshot_time_later
 
@@ -79,7 +79,7 @@ from
         select * from
             dm_exec_query_stats_dump
         where collect_date = @snapshot_time_earlier
-        and creation_time < @snapshot_time_earlier and last_execution_time >= @snapshot_time_earlier
+        and creation_time < @snapshot_time_earlier and last_execution_time >= dateadd(minute, -1, @snapshot_time_earlier)--collect_dateと同タイミングだとヒットしないクエリがあるので-1ひいておく
     ) as b
     on a.parent_query = b.parent_query and a.statement = b.statement and a.creation_time = b.creation_time
     where (a.execution_count - b.execution_count) > 1 --実行頻度が少ないクエリを除外
@@ -147,7 +147,7 @@ from
         select * from
             dm_exec_query_stats_dump
         where collect_date = @snapshot_time_earlier
-        and creation_time < @snapshot_time_earlier and last_execution_time >= @snapshot_time_earlier
+        and creation_time < @snapshot_time_earlier and last_execution_time >= dateadd(minute, -1, @snapshot_time_earlier) --collect_dateと同タイミングだとヒットしないクエリがあるので-1ひいておく
     ) as b
     on a.parent_query = b.parent_query and a.statement = b.statement and a.creation_time = b.creation_time
     where (a.execution_count - b.execution_count) > 1 --実行頻度が少ないクエリを除外
