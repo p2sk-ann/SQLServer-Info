@@ -1,7 +1,95 @@
 set transaction isolation level read uncommitted
 set lock_timeout 1000
 set nocount on
-   
+
+insert into dm_db_file_space_usage_tempdb_dump
+select
+getdate() as collect_date
+,sum(total_page_count) * 8 / 1024.0 as sum_total_page_size_mb --tempdbのサイズ
+,sum(allocated_extent_page_count) * 8 / 1024.0 as sum_allocated_extent_page_size_mb --割り当て済みのサイズ
+,sum(unallocated_extent_page_count) * 8 / 1024.0 as sum_unallocated_extent_page_size_mb --未割当のサイズ
+,sum(version_store_reserved_page_count) * 8 / 1024.0 as sum_version_store_reserved_page_size_mb --バージョンストアで使用しているサイズ
+,sum(user_object_reserved_page_count) * 8 / 1024.0 as sum_user_object_reserved_page_size_mb --一時テーブルなど
+,sum(internal_object_reserved_page_count) * 8 / 1024.0 as sum_internal_object_reserved_page_size_mb --ソートなどに使用されている領域
+,sum(mixed_extent_page_count) * 8 / 1024.0 as sum_mixed_extent_page_size_mb --今は単一エクステントが基本のはず
+from tempdb.sys.dm_db_file_space_usage --現在のDBの状況が返ってくるので「tempdb.」をつける
+option(maxdop 1)
+
+insert into dm_db_index_operational_stats_dump
+select
+   getdate() as collect_date
+  ,object_name(i.object_id) as table_name
+  ,i.name
+  ,d.*
+from sys.dm_db_index_operational_stats(db_id(), null, null, null) d
+left join sys.indexes i on d.OBJECT_ID = i.OBJECT_ID
+  and d.index_id = i.index_id
+option(maxdop 1)
+
+insert into dm_db_index_usage_stats_dump
+select
+  getdate() as collect_date
+  ,object_name(sys.indexes.object_id) as table_name
+  ,sys.indexes.name as index_name
+  ,sys.dm_db_partition_stats.row_count as row_count
+  ,sys.dm_db_partition_stats.reserved_page_count * 8.0 / 1024 as size_mb
+  ,type_desc
+  ,sys.dm_db_index_usage_stats.*
+from
+  sys.dm_db_partition_stats
+left join sys.indexes on sys.dm_db_partition_stats.object_id = sys.indexes.object_id
+                      and sys.dm_db_partition_stats.index_id = sys.indexes.index_id
+left join sys.dm_db_index_usage_stats on sys.dm_db_partition_stats.object_id = sys.dm_db_index_usage_stats.object_id
+                                      and sys.dm_db_partition_stats.index_id = sys.dm_db_index_usage_stats.index_id
+                                      and sys.dm_db_index_usage_stats.database_id = db_id()
+where
+  last_user_seek > dateadd(minute, -3, getdate())
+  or last_user_scan > dateadd(minute, -3, getdate())
+  or last_user_lookup > dateadd(minute, -3, getdate())
+  or last_user_update > dateadd(minute, -3, getdate())
+  or last_system_seek > dateadd(minute, -3, getdate())
+  or last_system_scan > dateadd(minute, -3, getdate())
+  or last_system_lookup > dateadd(minute, -3, getdate())
+  or last_system_update > dateadd(minute, -3, getdate())
+option(maxdop 1)
+
+insert into dm_exec_procedure_stats_dump
+select top (1000)
+  getdate() as collect_date,
+  object_name(ps.object_id, ps.database_id) as object_name,
+  ps.last_execution_time,
+  o.modify_date,
+  ps.database_id,
+  ps.cached_time,
+  ps.execution_count,
+  ps.total_worker_time,
+  ps.last_worker_time,
+  ps.min_worker_time,
+  ps.max_worker_time,
+  ps.total_elapsed_time,
+  ps.last_elapsed_time,
+  ps.min_elapsed_time,
+  ps.max_elapsed_time,
+  ps.total_logical_writes,
+  ps.last_logical_writes,
+  ps.min_logical_writes,
+  ps.max_logical_writes,
+  ps.total_logical_reads,
+  ps.last_logical_reads,
+  ps.min_logical_reads,
+  ps.max_logical_reads,
+  ps.plan_handle,
+  ps.sql_handle,
+  ps.object_id
+from
+  sys.dm_exec_procedure_stats  as ps
+  cross apply sys.dm_exec_sql_text(sql_handle)
+  cross apply sys.dm_exec_query_plan(plan_handle)
+  left join sys.objects as o on o.object_id = ps.object_id
+where last_execution_time >= dateadd(minute, -1, getdate())
+order by total_worker_time desc
+option(maxdop 1)
+
 insert into dm_exec_query_stats_dump
 select top (1000) 
   getdate() as collect_date
@@ -59,13 +147,7 @@ where
 or creation_time > dateadd(minute, -1, getdate())
 order by total_worker_time desc
 option(maxdop 1)
-   
-insert into dm_os_wait_stats_dump
-select getdate() as collect_date, *
-from sys.dm_os_wait_stats with(nolock)
-where waiting_tasks_count > 0
-option(maxdop 1)
- 
+
 insert into dm_exec_requests_dump
 select
    getdate() as collect_date
@@ -124,159 +206,7 @@ where des.is_user_process = 1
   and datediff(s, der.start_time, getdate()) < (3600 * 10)
 order by datediff(s, der.start_time, getdate()) desc
 option (maxdop 1)
-   
-insert into dm_exec_procedure_stats_dump
-select top (1000)
-  getdate() as collect_date,
-  object_name(ps.object_id, ps.database_id) as object_name,
-  ps.last_execution_time,
-  o.modify_date,
-  ps.database_id,
-  ps.cached_time,
-  ps.execution_count,
-  ps.total_worker_time,
-  ps.last_worker_time,
-  ps.min_worker_time,
-  ps.max_worker_time,
-  ps.total_elapsed_time,
-  ps.last_elapsed_time,
-  ps.min_elapsed_time,
-  ps.max_elapsed_time,
-  ps.total_logical_writes,
-  ps.last_logical_writes,
-  ps.min_logical_writes,
-  ps.max_logical_writes,
-  ps.total_logical_reads,
-  ps.last_logical_reads,
-  ps.min_logical_reads,
-  ps.max_logical_reads,
-  ps.plan_handle,
-  ps.sql_handle,
-  ps.object_id
-from
-  sys.dm_exec_procedure_stats  as ps
-  cross apply sys.dm_exec_sql_text(sql_handle)
-  cross apply sys.dm_exec_query_plan(plan_handle)
-  left join sys.objects as o on o.object_id = ps.object_id
-where last_execution_time >= dateadd(minute, -1, getdate())
-order by total_worker_time desc
-option(maxdop 1)
-   
-insert into dm_os_waiting_tasks_dump
-select top (5000)
-   getdate() as collect_date
-  ,wt.session_id
-  ,es.program_name
-  ,es.host_name
-  ,wt.blocking_session_id
-  ,er.blocking_session_id as er_blocking_session_id
-  ,wt.exec_context_id
-  ,er.start_time
-  ,er.wait_time
-  ,wt.wait_duration_ms
-  ,er.status
-  ,er.command
-  ,wt.wait_type
-  ,er.wait_type as er_wait_type
-  ,er.last_wait_type
-  ,wt.resource_description
-  ,er.wait_resource
-  ,wt.blocking_exec_context_id
---  ,ib.event_info
---  ,ib.event_type
---  ,ib.parameters
-  ,er.query_hash
-  ,er.query_plan_hash
-  ,er.cpu_time
-  ,er.total_elapsed_time
-  ,er.reads
-  ,er.writes
-  ,er.logical_reads
-from sys.dm_os_waiting_tasks as wt with (nolock)
-left join sys.dm_exec_requests as er with (nolock) on er.session_id = wt.session_id
-left join sys.dm_exec_sessions as es with (nolock) on es.session_id = wt.session_id
---outer apply sys.dm_exec_input_buffer(wt.session_id, null) as ib
-where wt.session_id > 50
-  and wt.wait_duration_ms >= 100
-  and er.status <> 'background'
-order by wait_duration_ms desc
-option (maxdop 1)
-   
-insert into dm_os_latch_stats_dump
-select
-  getdate() as collect_date
-  ,*
-from sys.dm_os_latch_stats
-where wait_time_ms > 0
-option(maxdop 1)
-   
-insert into dm_db_index_operational_stats_dump
-select
-   getdate() as collect_date
-  ,object_name(i.object_id) as table_name
-  ,i.name
-  ,d.*
-from sys.dm_db_index_operational_stats(db_id(), null, null, null) d
-left join sys.indexes i on d.OBJECT_ID = i.OBJECT_ID
-  and d.index_id = i.index_id
-option(maxdop 1)
-   
-insert into dm_db_index_usage_stats_dump
-select
-  getdate() as collect_date
-  ,object_name(sys.indexes.object_id) as table_name
-  ,sys.indexes.name as index_name
-  ,sys.dm_db_partition_stats.row_count as row_count
-  ,sys.dm_db_partition_stats.reserved_page_count * 8.0 / 1024 as size_mb
-  ,type_desc
-  ,sys.dm_db_index_usage_stats.*
-from
-  sys.dm_db_partition_stats
-left join sys.indexes on sys.dm_db_partition_stats.object_id = sys.indexes.object_id
-                      and sys.dm_db_partition_stats.index_id = sys.indexes.index_id
-left join sys.dm_db_index_usage_stats on sys.dm_db_partition_stats.object_id = sys.dm_db_index_usage_stats.object_id
-                                      and sys.dm_db_partition_stats.index_id = sys.dm_db_index_usage_stats.index_id
-                                      and sys.dm_db_index_usage_stats.database_id = db_id()
-where
-  last_user_seek > dateadd(minute, -3, getdate())
-  or last_user_scan > dateadd(minute, -3, getdate())
-  or last_user_lookup > dateadd(minute, -3, getdate())
-  or last_user_update > dateadd(minute, -3, getdate())
-  or last_system_seek > dateadd(minute, -3, getdate())
-  or last_system_scan > dateadd(minute, -3, getdate())
-  or last_system_lookup > dateadd(minute, -3, getdate())
-  or last_system_update > dateadd(minute, -3, getdate())
-option(maxdop 1)
-   
-insert into sys_stats_dump
-select
-     getdate() as collect_date
-    ,object_name(s1.object_id) as object_name
-    ,s1.name as statistics_name
-    ,left(colname, len(colname) - 1) as column_list
-    ,(case when charindex('|', left(colname, len(colname) - 1), 1) > 1 then 1 else 0 end) as multi_column_flag --1 : 複数列の統計情報
-    ,stats_date(s1.object_id, s1.stats_id) as statsdate --ここで統計情報の更新時間を確認できる
-from sys.stats as s1
-inner join sys.stats_columns as sc on s1.object_id = sc.object_id
-    and s1.stats_id = sc.stats_id and stats_column_id = 1
-inner join sys.columns as c on sc.object_id = c.object_id
-    and c.column_id = sc.column_id
-cross apply (
-    select
-      c.name + ' | '
-    from
-      sys.stats as s2
-    inner join sys.stats_columns as sc on s2.object_id = sc.object_id
-      and s2.stats_id = sc.stats_id
-    inner join sys.columns as c on sc.object_id = c.object_id
-      and c.column_id = sc.column_id
-    and s1.object_id = s2.object_id and s1.stats_id = s2.stats_id
-    order by stats_column_id
-for xml PATH('')
-) as a(colname)
-where stats_date(s1.object_id, s1.stats_id) > dateadd(minute, -2, getdate())
-option(maxdop 1)
- 
+
 insert into dm_io_virtual_file_stats_dump
 select
      getdate() as collect_date
@@ -328,6 +258,14 @@ join sys.dm_io_virtual_file_stats(null, null) b
 on a.database_id = b.database_id and a.file_id = b.file_id
 option (maxdop 1)
 
+insert into dm_os_latch_stats_dump
+select
+  getdate() as collect_date
+  ,*
+from sys.dm_os_latch_stats
+where wait_time_ms > 0
+option(maxdop 1)
+
 insert into dm_os_memory_clerks_dump
 select 
 getdate() as collect_date
@@ -337,18 +275,12 @@ group by type, name
 order by sum(pages_kb) desc
 option (maxdop 1)
 
-insert into dm_db_file_space_usage_tempdb_dump
+insert into dm_os_schedulers_dump
 select
-getdate() as collect_date
-,sum(total_page_count) * 8 / 1024.0 as sum_total_page_size_mb --tempdbのサイズ
-,sum(allocated_extent_page_count) * 8 / 1024.0 as sum_allocated_extent_page_size_mb --割り当て済みのサイズ
-,sum(unallocated_extent_page_count) * 8 / 1024.0 as sum_unallocated_extent_page_size_mb --未割当のサイズ
-,sum(version_store_reserved_page_count) * 8 / 1024.0 as sum_version_store_reserved_page_size_mb --バージョンストアで使用しているサイズ
-,sum(user_object_reserved_page_count) * 8 / 1024.0 as sum_user_object_reserved_page_size_mb --一時テーブルなど
-,sum(internal_object_reserved_page_count) * 8 / 1024.0 as sum_internal_object_reserved_page_size_mb --ソートなどに使用されている領域
-,sum(mixed_extent_page_count) * 8 / 1024.0 as sum_mixed_extent_page_size_mb --今は単一エクステントが基本のはず
-from tempdb.sys.dm_db_file_space_usage --現在のDBの状況が返ってくるので「tempdb.」をつける
-option(maxdop 1)
+    getdate() as collect_date
+    ,*
+from sys.dm_os_schedulers
+option (maxdop 1)
 
 insert into dm_os_tasks_dump
 select 
@@ -377,9 +309,77 @@ group by ot.session_id
 order by count(*) desc
 option (maxdop 1)
 
-insert into dm_os_schedulers_dump
-select
-    getdate() as collect_date
-    ,*
-from sys.dm_os_schedulers
+insert into dm_os_wait_stats_dump
+select getdate() as collect_date, *
+from sys.dm_os_wait_stats with(nolock)
+where waiting_tasks_count > 0
+option(maxdop 1)
+
+insert into dm_os_waiting_tasks_dump
+select top (5000)
+   getdate() as collect_date
+  ,wt.session_id
+  ,es.program_name
+  ,es.host_name
+  ,wt.blocking_session_id
+  ,er.blocking_session_id as er_blocking_session_id
+  ,wt.exec_context_id
+  ,er.start_time
+  ,er.wait_time
+  ,wt.wait_duration_ms
+  ,er.status
+  ,er.command
+  ,wt.wait_type
+  ,er.wait_type as er_wait_type
+  ,er.last_wait_type
+  ,wt.resource_description
+  ,er.wait_resource
+  ,wt.blocking_exec_context_id
+--  ,ib.event_info
+--  ,ib.event_type
+--  ,ib.parameters
+  ,er.query_hash
+  ,er.query_plan_hash
+  ,er.cpu_time
+  ,er.total_elapsed_time
+  ,er.reads
+  ,er.writes
+  ,er.logical_reads
+from sys.dm_os_waiting_tasks as wt with (nolock)
+left join sys.dm_exec_requests as er with (nolock) on er.session_id = wt.session_id
+left join sys.dm_exec_sessions as es with (nolock) on es.session_id = wt.session_id
+--outer apply sys.dm_exec_input_buffer(wt.session_id, null) as ib
+where wt.session_id > 50
+  and wt.wait_duration_ms >= 100
+  and er.status <> 'background'
+order by wait_duration_ms desc
 option (maxdop 1)
+
+insert into sys_stats_dump
+select
+     getdate() as collect_date
+    ,object_name(s1.object_id) as object_name
+    ,s1.name as statistics_name
+    ,left(colname, len(colname) - 1) as column_list
+    ,(case when charindex('|', left(colname, len(colname) - 1), 1) > 1 then 1 else 0 end) as multi_column_flag --1 : 複数列の統計情報
+    ,stats_date(s1.object_id, s1.stats_id) as statsdate --ここで統計情報の更新時間を確認できる
+from sys.stats as s1
+inner join sys.stats_columns as sc on s1.object_id = sc.object_id
+    and s1.stats_id = sc.stats_id and stats_column_id = 1
+inner join sys.columns as c on sc.object_id = c.object_id
+    and c.column_id = sc.column_id
+cross apply (
+    select
+      c.name + ' | '
+    from
+      sys.stats as s2
+    inner join sys.stats_columns as sc on s2.object_id = sc.object_id
+      and s2.stats_id = sc.stats_id
+    inner join sys.columns as c on sc.object_id = c.object_id
+      and c.column_id = sc.column_id
+    and s1.object_id = s2.object_id and s1.stats_id = s2.stats_id
+    order by stats_column_id
+for xml PATH('')
+) as a(colname)
+where stats_date(s1.object_id, s1.stats_id) > dateadd(minute, -2, getdate())
+option(maxdop 1)
