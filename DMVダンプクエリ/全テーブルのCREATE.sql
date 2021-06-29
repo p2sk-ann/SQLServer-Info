@@ -1,3 +1,7 @@
+set transaction isolation level read uncommitted
+set lock_timeout 1000
+set nocount on
+
 select
 getdate() as collect_date
 ,sum(total_page_count) * 8 / 1024.0 as sum_total_page_size_mb --tempdbのサイズ
