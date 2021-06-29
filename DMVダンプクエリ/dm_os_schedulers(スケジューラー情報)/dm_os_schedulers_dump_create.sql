@@ -1,5 +1,3 @@
-set transaction isolation level read uncommitted
-
 select
     getdate() as collect_date
     ,*
