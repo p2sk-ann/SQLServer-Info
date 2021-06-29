@@ -2,6 +2,26 @@ set transaction isolation level read uncommitted
 set lock_timeout 1000
 set nocount on
 
+/*
+drop table dm_db_file_space_usage_tempdb_dump
+drop table dm_db_index_operational_stats_dump
+drop table dm_db_index_usage_stats_dump
+drop table dm_db_partition_stats_dump
+drop table dm_exec_procedure_stats_dump
+drop table dm_exec_query_stats_dump
+drop table dm_exec_requests_dump_per_several_seconds
+drop table dm_exec_requests_dump
+drop table dm_io_virtual_file_stats_dump
+drop table dm_os_latch_stats_dump
+drop table dm_os_memory_clerks_dump
+drop table dm_os_schedulers_dump
+drop table dm_os_tasks_dump
+drop table dm_os_wait_stats_dump
+drop table dm_os_waiting_tasks_dump
+drop table sys_stats_dump
+drop table dm_exec_query_stats_dump_full
+*/
+
 select
 getdate() as collect_date
 ,sum(total_page_count) * 8 / 1024.0 as sum_total_page_size_mb --tempdbのサイズ
@@ -483,3 +503,60 @@ where 1=0
 --古いデータ削除用
 create index IX_sys_stats_dump_collect_date on sys_stats_dump(collect_date)
 
+select
+  getdate() as collect_date
+  ,qt.dbid
+  --サイズが大きくなりすぎるので500文字だけ格納
+  ,substring(qt.text, 1, 500) as parent_query
+  --サイズが大きくなりすぎるので500文字だけ格納
+  ,substring(substring(qt.text, qs.statement_start_offset / 2, (
+      case 
+        when qs.statement_end_offset = - 1
+          then len(convert(nvarchar(max), qt.text)) * 2
+        else qs.statement_end_offset
+      end - qs.statement_start_offset
+   ) / 2), 1, 500) as statement
+  ,execution_count
+  ,total_worker_time
+  ,total_elapsed_time
+  ,total_physical_reads
+  ,total_logical_reads
+  ,total_logical_writes
+  ,total_dop
+  ,min_dop
+  ,max_dop
+  ,max_worker_time
+  ,max_clr_time
+  ,max_elapsed_time
+  ,last_execution_time
+  ,last_worker_time
+  ,last_clr_time
+  ,last_elapsed_time
+  ,plan_generation_num
+  ,total_rows
+  ,last_rows
+  ,min_rows
+  ,max_rows
+  ,creation_time
+  ,total_grant_kb
+  ,last_grant_kb
+  ,min_grant_kb
+  ,max_grant_kb
+  ,total_used_grant_kb
+  ,last_used_grant_kb
+  ,min_used_grant_kb
+  ,max_used_grant_kb
+  ,total_ideal_grant_kb
+  ,last_ideal_grant_kb
+  ,min_ideal_grant_kb
+  ,max_ideal_grant_kb
+  ,query_hash
+  ,query_plan_hash
+into dm_exec_query_stats_dump_full
+from sys.dm_exec_query_stats qs
+outer apply sys.dm_exec_sql_text(qs.plan_handle) as qt
+where
+  1=0
+
+--古いデータ削除用
+create index IX_dm_exec_query_stats_dump_full_collect_date on dm_exec_query_stats_dump_full(collect_date)
