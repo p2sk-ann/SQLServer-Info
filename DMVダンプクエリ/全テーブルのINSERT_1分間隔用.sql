@@ -187,7 +187,7 @@ select
   ,des.writes as session_writes
   ,des.logical_reads as session_logical_reads
   ,der.scheduler_id
-  ,dop
+  ,der.dop
   ,deq.grant_time
   ,deq.granted_memory_kb
   ,deq.requested_memory_kb
