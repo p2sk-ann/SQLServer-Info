@@ -42,7 +42,7 @@ begin
 		and datediff(s, der.start_time, GETDATE()) >= @recompile_threashold_sec
 		and sql_handle is not null
 		and isnull(last_wait_type, '') not in ('WRITELOG', 'ASYNC_NETWORK_IO', 'OLEDB') --ノイズを除外
-		and command <> 'INSERT' and db_name(der.database_id) <> 'distribution' --ノイズを除外。バッチは並列実行があるのと、バッチが狂ったところで同時実行数は増えないため、影響は拡大しないはず。
+		and command <> 'INSERT' and db_name(der.database_id) <> 'distribution' --ノイズを除外
 		and wait_resource not like 'APPLICATION%'
 		group by
 			sql_handle
