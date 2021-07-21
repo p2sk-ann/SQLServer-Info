@@ -58,7 +58,7 @@ begin
 		--select @text, @exec_cnt
 		set @msg = @msg + '■ クエリ(最初の2000文字)' + @CrLf + substring(@text, 1, 2000) + @CrLf + '■ 同時実行数' + @CrLf + cast(@exec_cnt as nvarchar) + @CrLf + @CrLf
 		--クエリのリコンパイル
-		DBCC FREEPROCCACHE(@sql_handle) WITH NO_INFOMSGS
+		DBCC FREEPROCCACHE(@sql_handle) WITH NO_INFOMSGS --DBCC FREEPROCCACHE() --全クリアならsql_handle指定なし
 
 		fetch next from cursor_sqlhandle into @sql_handle, @text, @exec_cnt
 	end
