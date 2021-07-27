@@ -2,7 +2,7 @@
 --★publisher-distributerの遅延を確認
 INSERT INTO ReplicationCheck_Logreader_3
 SELECT
-	 @ServerName
+	 @@SERVERNAME
 	,agent_id
 	,name
 	,max(delivery_latency / (1000 * 60)) as max_latency_min
