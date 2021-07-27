@@ -1,6 +1,6 @@
 --■ LogReaderAgenet
 --★publisher-distributerの遅延を確認
-INSERT INTO ReplicationCheck_Logreader_3
+INSERT INTO ReplicationCheck_Distributor_1
 SELECT
 	 @@SERVERNAME
 	,agent_id
