@@ -15,6 +15,5 @@ INSERT INTO #replcounters_tmp
 exec sp_replcounters
 
 INSERT INTO ReplicationCheck_Logreader_2
-select @ServerName, *, getdate() from #replcounters_tmp
+select @@SERVERNAME, *, getdate() from #replcounters_tmp
 
-truncate table #replcounters_tmp
