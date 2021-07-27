@@ -8,7 +8,7 @@ select * into #DistStat from distribution.dbo.MSdistribution_status with(nolock)
 
 INSERT INTO ReplicationCheck_distributor_2
 SELECT DISTINCT
-	 @ServerName
+	 @@SERVERNAME
 	,a.article_id
 	,a.Article
 	,p.Publication
