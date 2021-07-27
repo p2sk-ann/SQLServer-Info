@@ -1,15 +1,17 @@
-	SELECT publisher_database_id
-		,datepart(year, EntryTime) AS Year
-		,datepart(month, EntryTime) AS Month
-		,datepart(day, EntryTime) AS Day
-		,datepart(hh, EntryTime) AS Hour
-		,datepart(mi, EntryTime) AS Minute --時間単位にしたいときはコメントアウト
-		,isnull(sum(CommandCount), 0) AS CommandCountPerTimeUnit
-		,isnull(sum(TransactionCount), 0) AS TransactionCountPerTimeUnit
-		,isnull(sum(DataLengthBytes), 0) AS DataLengthBytesPerTimeUnit
-		,article
-		,publication
-  INTO ReplicationCheck_Logreader_1
+	SELECT @@servername as _server_name
+		,publisher_database_id as _publisher_database_id
+		,datepart(year, EntryTime) AS _Year
+		,datepart(month, EntryTime) AS _Month
+		,datepart(day, EntryTime) AS _Day
+		,datepart(hh, EntryTime) AS _Hour
+		,datepart(mi, EntryTime) AS _Minute --時間単位にしたいときはコメントアウト
+		,isnull(sum(CommandCount), 0) AS _CommandCountPerTimeUnit
+		,isnull(sum(TransactionCount), 0) AS _TransactionCountPerTimeUnit
+		,isnull(sum(DataLengthBytes), 0) AS _DataLengthBytesPerTimeUnit
+		,article as _article
+		,publication as  _publication
+		,getdate() as _registDT
+	INTO ReplicationCheck_Logreader_1
 	FROM (
 		SELECT t.publisher_database_id
 			,t.xact_seqno
