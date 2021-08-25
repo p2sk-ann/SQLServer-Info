@@ -51,7 +51,6 @@ select @total_execution_count
 ,@total_logical_writes 
 ,@total_logical_reads 
 
-
 --該当時間帯でリソースの消費量が多い順にストアドプロシージャをリストアップ
 select
   *
