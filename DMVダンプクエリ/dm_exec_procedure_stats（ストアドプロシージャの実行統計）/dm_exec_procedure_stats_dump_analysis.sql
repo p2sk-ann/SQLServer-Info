@@ -1,96 +1,80 @@
-declare @total_execution_count bigint
-declare @total_total_worker_time bigint
-declare @total_total_elapsed_time bigint
-declare @total_total_logical_writes bigint
-declare @total_total_logical_reads bigint
+set transaction isolation level read uncommitted
 
-declare @snapshot_time_earlier datetime
-declare @snapshot_time_later datetime
+declare @total_execution_count float
+declare @total_worker_time float
+declare @total_elapsed_time float
+declare @total_logical_writes float
+declare @total_logical_reads float
 
+--期間指定
+declare
+   @start_at datetime = '2021/08/24 21:00'
+  ,@end_at datetime = '2021/08/24 22:00'
+
+--一時テーブルに情報をダンプ
 select
-	 @snapshot_time_earlier = min(collect_date) --collect_dateに存在する日時を設定（古い方）
-	,@snapshot_time_later = max(collect_date) --collect_dateに存在する日時を設定（新しい方）
-from dm_exec_procedure_stats_dump with(nolock)
-where collect_date between '2021/3/1 15:00' and '2021/3/1 15:15'
-
-select @snapshot_time_earlier, @snapshot_time_later
-
-select
-     @total_execution_count = sum(execution_count)
-    ,@total_total_worker_time = sum(total_worker_time)
-    ,@total_total_elapsed_time = sum(total_elapsed_time)
-    ,@total_total_logical_writes = sum(total_logical_writes)
-    ,@total_total_logical_reads = sum(total_logical_reads)
+	*
+into #tmp
 from
 (
-    select
-         (a.execution_count - b.execution_count) as execution_count
-        ,(a.total_worker_time - b.total_worker_time) as total_worker_time
-        ,(a.total_elapsed_time - b.total_elapsed_time) as total_elapsed_time
-        ,(a.total_logical_writes - b.total_logical_writes) as total_logical_writes
-        ,(a.total_logical_reads - b.total_logical_reads) as total_logical_reads
-    from
-    (
-        select * from
-            dm_exec_procedure_stats_dump
-        where collect_date = @snapshot_time_later
-    ) as a
-    join
-    (
-        select * from
-            dm_exec_procedure_stats_dump
-        where collect_date = @snapshot_time_earlier
-    ) as b
-    on a.object_name = b.object_name
---    where (a.total_worker_time - b.total_worker_time) > 1 --待ち頻度が少ないクエリを除外
-) as c
+  select
+     row_number() over (partition by object_name, cached_time order by execution_count desc) as rownum
+    ,min(execution_count) over (partition by object_name, cached_time) as min_execution_count
+    ,min(total_worker_time) over (partition by object_name, cached_time) as min_total_worker_time
+    ,min(total_elapsed_time) over (partition by object_name, cached_time) as min_total_elapsed_time
+    ,min(total_logical_writes) over (partition by object_name, cached_time) as min_total_logical_writes
+    ,min(total_logical_reads) over (partition by object_name, cached_time) as min_total_logical_reads
+    ,*
+  from dm_exec_procedure_stats_dump with(nolock)
+  where object_name not like 'sp[_]%' --システムストアドプロシージャを除外
+  and exists ( --システムストアドプロシージャを除外
+        select * from sys.objects ob with(nolock) where ob.object_id = object_id(object_name) and is_ms_shipped = 0
+    )
+  and collect_date between @start_at and @end_at
+  and database_id = db_id()
+) as a
+where rownum = 1 --キャッシュアウトされていない同一データの中で最新のものだけに限定
 
+--該当時間帯の合計値を算出
 select
-    *
-    ,(100.0 * execution_count / (1+@total_execution_count)) as percent_execution_count
-    ,(100.0 * total_worker_time / (1+@total_total_worker_time)) as percent_total_worker_time
-    ,(100.0 * total_elapsed_time / (1+@total_total_elapsed_time)) as percent_total_elapsed_time
-    ,(100.0 * total_logical_writes / (1+@total_total_logical_writes)) as percent_total_logical_writes
-    ,(100.0 * total_logical_reads / (1+@total_total_logical_reads)) as percent_total_logical_reads
+   @total_execution_count = sum((case when cached_time >= @start_at then execution_count else execution_count - min_execution_count end))
+  ,@total_worker_time = sum((case when cached_time >= @start_at then total_worker_time else total_worker_time - min_total_worker_time end))
+  ,@total_elapsed_time = sum((case when cached_time >= @start_at then total_elapsed_time else total_elapsed_time - min_total_elapsed_time end))
+  ,@total_logical_writes = sum((case when cached_time >= @start_at then total_logical_writes else total_logical_writes - min_total_logical_writes end))
+  ,@total_logical_reads = sum((case when cached_time >= @start_at then total_logical_reads else total_logical_reads - min_total_logical_reads end))
+from
+  #tmp
+
+select @total_execution_count 
+,@total_worker_time 
+,@total_elapsed_time 
+,@total_logical_writes 
+,@total_logical_reads 
+
+
+--該当時間帯でリソースの消費量が多い順にストアドプロシージャをリストアップ
+select
+  *
+  ,cast(total_execution_count / @total_execution_count * 100 as numeric(4,2)) as percentage_execution_count
+  ,cast(total_worker_time / @total_worker_time * 100 as numeric(4,2)) as percentage_worker_time
+  ,cast(total_elapsed_time / @total_elapsed_time * 100 as numeric(4,2)) as percentage_elapsed_time
+  ,cast(total_logical_writes / @total_logical_writes * 100 as numeric(4,2)) as percentage_logical_writes
+  ,cast(total_logical_reads / @total_logical_reads * 100 as numeric(4,2)) as percentage_logical_reads
 from
 (
-    select
-         a.object_name
-        ,a.last_execution_time
-        ,a.modify_date
-        ,a.cached_time
-        ,a.collect_date
-        ,(a.execution_count - b.execution_count) as execution_count
-        ,(a.total_worker_time - b.total_worker_time) as total_worker_time
-        ,(a.total_elapsed_time - b.total_elapsed_time) as total_elapsed_time
-        ,(a.total_logical_writes - b.total_logical_writes) as total_logical_writes
-        ,(a.total_logical_reads - b.total_logical_reads) as total_logical_reads
-        --変化があったものだけ抽出
-        ,(case when a.last_worker_time <> b.last_worker_time then a.last_worker_time else null end) as changed_last_worker_time
-        ,(case when a.min_worker_time <> b.min_worker_time then a.min_worker_time else null end) as changed_min_worker_time
-        ,(case when a.max_worker_time <> b.max_worker_time then a.max_worker_time else null end) as changed_max_worker_time
-        ,(case when a.last_elapsed_time <> b.last_elapsed_time then a.last_elapsed_time else null end) as changed_last_elapsed_time
-        ,(case when a.min_elapsed_time <> b.min_elapsed_time then a.min_elapsed_time else null end) as changed_min_elapsed_time
-        ,(case when a.max_elapsed_time <> b.max_elapsed_time then a.max_elapsed_time else null end) as changed_max_elapsed_time
-        ,(case when a.last_logical_writes <> b.last_logical_writes then a.last_logical_writes else null end) as changed_last_logical_writes
-        ,(case when a.min_logical_writes <> b.min_logical_writes then a.min_logical_writes else null end) as changed_min_logical_writes
-        ,(case when a.max_logical_writes <> b.max_logical_writes then a.max_logical_writes else null end) as changed_max_logical_writes
-        ,(case when a.last_logical_reads <> b.last_logical_reads then a.last_logical_reads else null end) as changed_last_logical_reads
-        ,(case when a.min_logical_reads <> b.min_logical_reads then a.min_logical_reads else null end) as changed_min_logical_reads
-        ,(case when a.max_logical_reads <> b.max_logical_reads then a.max_logical_reads else null end) as changed_max_logical_reads
-    from
-    (
-        select * from
-            dm_exec_procedure_stats_dump
-        where collect_date = @snapshot_time_later
-    ) as a
-    join
-    (
-        select * from
-            dm_exec_procedure_stats_dump
-        where collect_date = @snapshot_time_earlier
-    ) as b
-    on a.object_name = b.object_name
---    where (a.total_worker_time - b.total_worker_time) > 1 --待ち頻度が少ないクエリを除外
-) as c
-order by total_worker_time desc
+  select
+     object_name
+    ,sum((case when cached_time >= @start_at then execution_count else execution_count - min_execution_count end)) as total_execution_count
+    ,sum((case when cached_time >= @start_at then total_worker_time else total_worker_time - min_total_worker_time end)) as total_worker_time
+    ,sum((case when cached_time >= @start_at then total_elapsed_time else total_elapsed_time - min_total_elapsed_time end)) as total_elapsed_time
+    ,sum((case when cached_time >= @start_at then total_logical_writes else total_logical_writes - min_total_logical_writes end)) as total_logical_writes
+    ,sum((case when cached_time >= @start_at then total_logical_reads else total_logical_reads - min_total_logical_reads end)) as total_logical_reads
+  from
+    #tmp
+  group by
+    object_name
+) as a
+order by
+  percentage_worker_time desc --並び替えたい項目を指定
+
+drop table #tmp
