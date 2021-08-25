@@ -49,18 +49,18 @@ from
 --該当時間帯でリソースの消費量が多い順にストアドプロシージャをリストアップ
 select
   *
-  ,cast(total_worker_time*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_worker_time
-  ,cast(total_elapsed_time*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_elapsed_time
-  ,cast(total_logical_writes*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_logical_writes
-  ,cast(total_logical_reads*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_logical_reads
-  ,cast(total_grant_kb*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_grant_kb
-  ,cast(total_dop*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,1)) as avg_dop
   ,cast(total_execution_count / @total_execution_count * 100 as numeric(4,2)) as percentage_execution_count
   ,cast(total_worker_time / @total_worker_time * 100 as numeric(4,2)) as percentage_worker_time
   ,cast(total_elapsed_time / @total_elapsed_time * 100 as numeric(4,2)) as percentage_elapsed_time
   ,cast(total_logical_writes / @total_logical_writes * 100 as numeric(4,2)) as percentage_logical_writes
   ,cast(total_logical_reads / @total_logical_reads * 100 as numeric(4,2)) as percentage_logical_reads
   ,cast(total_grant_kb / @total_grant_kb * 100 as numeric(4,2)) as percentage_grant_kb
+  ,cast(total_worker_time*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_worker_time
+  ,cast(total_elapsed_time*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_elapsed_time
+  ,cast(total_logical_writes*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_logical_writes
+  ,cast(total_logical_reads*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_logical_reads
+  ,cast(total_grant_kb*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,0)) as avg_grant_kb
+  ,cast(total_dop*1.0 / (case when total_execution_count = 0 then 1 else total_execution_count end) as numeric(20,1)) as avg_dop
 from
 (
   select
