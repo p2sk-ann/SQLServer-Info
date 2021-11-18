@@ -335,9 +335,9 @@ select top (5000)
   ,wt.resource_description
   ,er.wait_resource
   ,wt.blocking_exec_context_id
---  ,ib.event_info
---  ,ib.event_type
---  ,ib.parameters
+  ,ib.event_info
+  ,ib.event_type
+  ,ib.parameters
   ,er.query_hash
   ,er.query_plan_hash
   ,er.cpu_time
@@ -348,7 +348,7 @@ select top (5000)
 from sys.dm_os_waiting_tasks as wt with (nolock)
 left join sys.dm_exec_requests as er with (nolock) on er.session_id = wt.session_id
 left join sys.dm_exec_sessions as es with (nolock) on es.session_id = wt.session_id
---outer apply sys.dm_exec_input_buffer(wt.session_id, null) as ib
+outer apply sys.dm_exec_input_buffer(wt.session_id, null) as ib
 where wt.session_id > 50
   and wt.wait_duration_ms >= 100
   and er.status <> 'background'
