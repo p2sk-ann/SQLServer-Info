@@ -240,16 +240,16 @@ select
     ,redo_target_lsn
     ,redo_target_fork_guid
     ,backup_lsn
---    ,credential_id
+    ,credential_id
     ,sample_ms
     ,num_of_reads
     ,num_of_bytes_read
     ,io_stall_read_ms
---    ,io_stall_queued_read_ms
+    ,io_stall_queued_read_ms
     ,num_of_writes
     ,num_of_bytes_written
     ,io_stall_write_ms
---    ,io_stall_queued_write_ms
+    ,io_stall_queued_write_ms
     ,io_stall
     ,size_on_disk_bytes
     ,file_handle
