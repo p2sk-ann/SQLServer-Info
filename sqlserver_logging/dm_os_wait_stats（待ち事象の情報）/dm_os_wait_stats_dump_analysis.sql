@@ -5,9 +5,12 @@ declare @total_signal_wait_time_ms bigint
 
 declare @snapshot_time_earlier datetime
 declare @snapshot_time_later datetime
-set @snapshot_time_earlier = '2020-11-12 23:55:11.223' --collect_dateに存在する日時を設定（古い方）
-set @snapshot_time_later = '2020-11-13 00:05:11.030' --collect_dateに存在する日時を設定（新しい方）
+declare
+   @start_at datetime = '2021/11/30 04:00'
+  ,@end_at datetime = '2021/11/30 04:03'
 
+select @snapshot_time_earlier = min(collect_date) from dm_os_wait_stats_dump where collect_date between @start_at and @end_at
+select @snapshot_time_later = max(collect_date) from dm_os_wait_stats_dump where collect_date between @start_at and @end_at
 
 select
      @total_waiting_tasks_count = sum(waiting_tasks_count)
