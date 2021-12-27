@@ -10,8 +10,8 @@ declare @total_dop float
 
 --期間指定
 declare
-   @start_at datetime = '2021/08/24 21:00'
-  ,@end_at datetime = '2021/08/24 22:00'
+   @start_at datetime = '2021/12/26 23:59'
+  ,@end_at datetime = '2021/12/27 00:02'
 
 --一時テーブルに情報をダンプ
 select
@@ -20,19 +20,28 @@ into #tmp
 from
 (
   select
-     row_number() over (partition by dbid, parent_query, statement, creation_time order by execution_count desc) as rownum
-    ,min(execution_count) over (partition by dbid, parent_query, statement, creation_time) as min_execution_count
-    ,min(total_worker_time) over (partition by dbid, parent_query, statement, creation_time) as min_total_worker_time
-    ,min(total_elapsed_time) over (partition by dbid, parent_query, statement, creation_time) as min_total_elapsed_time
-    ,min(total_logical_writes) over (partition by dbid, parent_query, statement, creation_time) as min_total_logical_writes
-    ,min(total_logical_reads) over (partition by dbid, parent_query, statement, creation_time) as min_total_logical_reads
-    ,min(total_grant_kb) over (partition by dbid, parent_query, statement, creation_time) as min_total_grant_kb
-    ,min(total_dop) over (partition by dbid, parent_query, statement, creation_time) as min_total_dop
+     row_number() over (partition by dbid, parent_query, statement, creation_time, duplication_rownum order by execution_count desc) as rownum
+    ,min(execution_count) over (partition by dbid, parent_query, statement, creation_time, duplication_rownum) as min_execution_count
+    ,min(total_worker_time) over (partition by dbid, parent_query, statement, creation_time, duplication_rownum) as min_total_worker_time
+    ,min(total_elapsed_time) over (partition by dbid, parent_query, statement, creation_time, duplication_rownum) as min_total_elapsed_time
+    ,min(total_logical_writes) over (partition by dbid, parent_query, statement, creation_time, duplication_rownum) as min_total_logical_writes
+    ,min(total_logical_reads) over (partition by dbid, parent_query, statement, creation_time, duplication_rownum) as min_total_logical_reads
+    ,min(total_grant_kb) over (partition by dbid, parent_query, statement, creation_time, duplication_rownum) as min_total_grant_kb
+    ,min(total_dop) over (partition by dbid, parent_query, statement, creation_time, duplication_rownum) as min_total_dop
     ,*
-  from dm_exec_query_stats_dump with(nolock)
-  where collect_date between @start_at and @end_at
+  from
+  (
+    select
+       *
+      ,row_number() over (partition by dbid, parent_query, statement, creation_time, collect_date order by execution_count desc) as duplication_rownum --dbid, parent_query, statement, creation_time単位で全重複しちゃってる場合は、execution_countで識別する
+    from dm_exec_query_stats_dump with(nolock)
+    where collect_date between @start_at and @end_at
+  ) as a
 ) as a
 where rownum = 1 --キャッシュアウトされていない同一データの中で最新のものだけに限定
+
+--補助情報表示
+select min(collect_date) as start_at, max(collect_date) as end_at, datediff(second, min(collect_date), max(collect_date)) as span_sec from #tmp
 
 --該当時間帯の合計値を算出
 select
