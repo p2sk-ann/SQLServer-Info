@@ -8,8 +8,8 @@ declare @total_logical_reads float
 
 --期間指定
 declare
-   @start_at datetime = '2021/08/24 21:00'
-  ,@end_at datetime = '2021/08/24 22:00'
+   @start_at datetime = '2021/12/26 23:59'
+  ,@end_at datetime = '2021/12/27 00:02'
 
 --一時テーブルに情報をダンプ
 select
@@ -34,6 +34,9 @@ from
   and database_id = db_id()
 ) as a
 where rownum = 1 --キャッシュアウトされていない同一データの中で最新のものだけに限定
+
+--補助情報表示
+select min(collect_date) as start_at, max(collect_date) as end_at, datediff(second, min(collect_date), max(collect_date)) as span_sec from #tmp
 
 --該当時間帯の合計値を算出
 select
